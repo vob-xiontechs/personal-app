@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ../../backend-api
+    container_name: backend-staging
+    environment:
+      - SPRING_PROFILES_ACTIVE=staging
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=staging_db
+      - DB_USERNAME=staging_user
+      - DB_PASSWORD=staging_pass
+    ports:
+      - "8082:8082"
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.1
+    container_name: db-staging
+    environment:
+      MYSQL_DATABASE: staging_db
+      MYSQL_USER: staging_user
+      MYSQL_PASSWORD: staging_pass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3308:3306"
+    volumes:
+      - db-staging-data:/var/lib/mysql
+
+volumes:
+  db-staging-data:
