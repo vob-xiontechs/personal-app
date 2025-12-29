@@ -118,23 +118,28 @@ export DB_PASSWORD=your_mysql_password
 
 #### Docker Environment Setup
 
-If using Docker Compose, the database connection info will be:
+If using the existing Docker Compose configuration (`docker/develop/docker-compose.yml`), the database connection info is:
 
 ```bash
-# Docker Environment Variables
-DB_HOST=mysql
+# Docker Environment Variables (from docker-compose.yml)
+DB_HOST=db
 DB_PORT=3306
-DB_NAME=testdb
-DB_USERNAME=appuser
-DB_PASSWORD=apppassword
+DB_NAME=develop_db
+DB_USERNAME=develop_user
+DB_PASSWORD=develop_pass
 ```
 
 **Database Connection Details:**
-- **Host**: `mysql` (Docker service name) or `localhost:3306` (from host)
-- **Database**: `testdb`
-- **Username**: `appuser`
-- **Password**: `apppassword`
-- **Root Password**: `root` (for admin access)
+- **Service Name**: `db` (internal Docker network)
+- **External Host**: `localhost:3307` (mapped port from host)
+- **Database**: `develop_db`
+- **Username**: `develop_user`
+- **Password**: `develop_pass`
+- **Root Password**: `rootpass` (for admin access)
+
+**Docker Compose Services:**
+- **Backend**: `http://localhost:8081` (port 8081)
+- **MySQL**: `localhost:3307` (port 3307 externally, 3306 internally)
 
 #### Setup Steps
 
@@ -189,82 +194,49 @@ The frontend will start on `http://localhost:3009`
 
 ### Using Docker Compose
 
-For development with MySQL in Docker:
-
-```yaml
-# docker-compose.yml (create in root directory)
-version: '3.8'
-services:
-  mysql:
-    image: mysql:8.0
-    container_name: personal-app-mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: testdb
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: apppassword
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
-
-  backend:
-    build: ./backend-api
-    container_name: personal-app-backend
-    ports:
-      - "8080:8080"
-    environment:
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: testdb
-      DB_USERNAME: appuser
-      DB_PASSWORD: apppassword
-    depends_on:
-      - mysql
-
-  frontend:
-    build: ./frontend-client
-    container_name: personal-app-frontend
-    ports:
-      - "3009:3009"
-    depends_on:
-      - backend
-
-volumes:
-  mysql_data:
-```
+The project includes a pre-configured Docker Compose file for development:
 
 ```bash
-# Run all services
+# Navigate to the docker develop directory
+cd docker/develop
+
+# Run all services (backend + database)
 docker-compose up --build
 ```
 
+**Services started:**
+- **Backend**: http://localhost:8081
+- **MySQL**: localhost:3307 (external) / db:3306 (internal)
+
+**Docker Compose file location:** `docker/develop/docker-compose.yml`
+
 ### Individual Docker Builds
 
-#### MySQL Docker
+#### MySQL Docker (Development)
 ```bash
-docker run --name personal-app-mysql \
-  -e MYSQL_ROOT_PASSWORD=root \
-  -e MYSQL_DATABASE=testdb \
-  -e MYSQL_USER=appuser \
-  -e MYSQL_PASSWORD=apppassword \
-  -p 3306:3306 \
-  -d mysql:8.0
+# Using same config as docker-compose.yml
+docker run --name db-develop \
+  -e MYSQL_DATABASE=develop_db \
+  -e MYSQL_USER=develop_user \
+  -e MYSQL_PASSWORD=develop_pass \
+  -e MYSQL_ROOT_PASSWORD=rootpass \
+  -p 3307:3306 \
+  -d mysql:8.1
 ```
 
-#### Backend Docker
+#### Backend Docker (Development)
 ```bash
 cd backend-api
-docker build -t personal-app-backend .
-docker run --name personal-app-backend \
+docker build -t backend-develop .
+docker run --name backend-develop \
+  -e SPRING_PROFILES_ACTIVE=develop \
   -e DB_HOST=host.docker.internal \
-  -e DB_PORT=3306 \
-  -e DB_NAME=testdb \
-  -e DB_USERNAME=appuser \
-  -e DB_PASSWORD=apppassword \
-  -p 8080:8080 \
-  personal-app-backend
+  -e DB_PORT=3307 \
+  -e DB_NAME=develop_db \
+  -e DB_USERNAME=develop_user \
+  -e DB_PASSWORD=develop_pass \
+  -p 8081:8081 \
+  backend-develop
 ```
 
 #### Frontend Docker
