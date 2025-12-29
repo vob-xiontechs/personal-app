@@ -20,13 +20,14 @@ export class ProfileApiRepository implements ProfileRepository {
     }
 
     // Real API call (when not using mock)
-    const response = await this.http.post(
-      `${env.API_BASE_URL}/api/profile`,
-      request
-    );
-
-    if (!response.ok) {
-      throw new Error("API error");
+    try {
+      await this.http.post<void>(
+        `${env.API_BASE_URL}/api/profile`,
+        request
+      );
+    } catch (error: any) {
+      // HttpClient already handles error responses and throws appropriate errors
+      throw error;
     }
   }
 }
