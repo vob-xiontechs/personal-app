@@ -116,6 +116,26 @@ export DB_USERNAME=root
 export DB_PASSWORD=your_mysql_password
 ```
 
+#### Docker Environment Setup
+
+If using Docker Compose, the database connection info will be:
+
+```bash
+# Docker Environment Variables
+DB_HOST=mysql
+DB_PORT=3306
+DB_NAME=testdb
+DB_USERNAME=appuser
+DB_PASSWORD=apppassword
+```
+
+**Database Connection Details:**
+- **Host**: `mysql` (Docker service name) or `localhost:3306` (from host)
+- **Database**: `testdb`
+- **Username**: `appuser`
+- **Password**: `apppassword`
+- **Root Password**: `root` (for admin access)
+
 #### Setup Steps
 
 ```bash
