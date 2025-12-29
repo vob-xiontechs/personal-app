@@ -32,3 +32,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Vaadin Flow generated files ###
+src/main/frontend/generated/
