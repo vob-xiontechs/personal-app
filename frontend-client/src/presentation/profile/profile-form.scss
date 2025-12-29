@@ -12,6 +12,7 @@
 
   background-color: $layer-01;
   border-radius: 0.25rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 
   /* Title */
   &__title {
@@ -23,6 +24,62 @@
   /* Field wrapper */
   &__field {
     margin-bottom: $spacing-05;
+
+    /* TextInput styling */
+    .cds--text-input,
+    .cds--text-input__field-outer-wrapper,
+    .cds--text-input__field-wrapper {
+      width: 100%;
+    }
+
+    .cds--text-input {
+      background-color: $field-01;
+      border: 1px solid $border-strong-01;
+      border-radius: 0.25rem;
+      padding: $spacing-04 $spacing-05;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      transition: all 0.2s ease-in-out;
+
+      &:focus {
+        outline: none;
+        border-color: $focus;
+        box-shadow: 0 0 0 2px $focus-inset;
+      }
+
+      &:hover:not(:focus) {
+        border-color: $border-strong-02;
+      }
+
+      &::placeholder {
+        color: $text-placeholder;
+      }
+
+      &[data-invalid] {
+        border-color: $support-error;
+        box-shadow: 0 0 0 2px $support-error-inset;
+      }
+    }
+
+    .cds--label {
+      @include type-style("label-01");
+      color: $text-secondary;
+      margin-bottom: $spacing-03;
+      display: block;
+      font-weight: 600;
+    }
+
+    .cds--form-requirement {
+      @include type-style("helper-text-01");
+      color: $text-error;
+      margin-top: $spacing-02;
+    }
+
+    /* Password input specific styling */
+    input[type="password"] {
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.05em;
+    }
   }
 
   /* Error message */
@@ -36,5 +93,27 @@
   /* Action area */
   &__actions {
     margin-top: $spacing-06;
+
+    .cds--btn {
+      width: 100%;
+      padding: $spacing-04 $spacing-05;
+      border-radius: 0.25rem;
+      font-weight: 600;
+      transition: all 0.2s ease-in-out;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
   }
 }
