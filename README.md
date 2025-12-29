@@ -194,13 +194,13 @@ The frontend will start on `http://localhost:3009`
 
 ### Using Docker Compose
 
-The project includes a pre-configured Docker Compose file for development:
+The project includes a pre-configured Docker Compose file for backend and database:
 
 ```bash
 # Navigate to the docker develop directory
 cd docker/develop
 
-# Run all services (backend + database)
+# Run backend and database services
 docker-compose up --build
 ```
 
@@ -237,15 +237,6 @@ docker run --name backend-develop \
   -e DB_PASSWORD=develop_pass \
   -p 8081:8081 \
   backend-develop
-```
-
-#### Frontend Docker
-```bash
-cd frontend-client
-docker build -t personal-app-frontend .
-docker run --name personal-app-frontend \
-  -p 3009:3009 \
-  personal-app-frontend
 ```
 
 ## 🧪 Testing
