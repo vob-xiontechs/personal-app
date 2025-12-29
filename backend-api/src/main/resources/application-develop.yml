@@ -19,6 +19,11 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  # Disable security and GraphQL auto-configuration for testing
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.graphql.GraphQlAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 
 server:
   port: 8081
