@@ -57,7 +57,7 @@
 
       &[data-invalid] {
         border-color: $support-error;
-        box-shadow: 0 0 0 2px $support-error-inset;
+        box-shadow: 0 0 0 2px rgba(255, 85, 85, 0.25);
       }
     }
 
