@@ -11,13 +11,24 @@ export class ProfileApiRepository implements ProfileRepository {
   }
 
   async create(request: ProfileRequest): Promise<void> {
-    const response = await this.http.post(
-      `${env.API_BASE_URL}/api/profile`,
-      request
-    );
+    // Mock API response for testing
+    console.log("Mock API Call - Creating profile:", request);
 
-    if (!response.ok) {
-      throw new Error("API error");
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Mock validation - simulate email already exists error for testing
+    if (request.email === "test@error.com") {
+      throw new Error("Email already exists");
     }
+
+    // Mock validation - simulate server error for testing
+    if (request.email === "test@server.com") {
+      throw new Error("Server error occurred");
+    }
+
+    // Mock success response
+    console.log("Mock API Success - Profile created successfully");
+    return Promise.resolve();
   }
 }
