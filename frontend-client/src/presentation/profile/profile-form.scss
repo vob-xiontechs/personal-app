@@ -6,24 +6,32 @@
 
 /* Block */
 .profile-form {
-  max-width: 28rem;
+  max-width: 32rem;
   margin: $spacing-09 auto;
-  padding: $spacing-07;
+  padding: $spacing-08 $spacing-07;
 
   background-color: $layer-01;
-  border-radius: 0.25rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid $border-subtle-01;
 
   /* Title */
   &__title {
     @include type-style("productive-heading-03");
     color: $text-primary;
-    margin-bottom: $spacing-06;
+    margin-bottom: $spacing-07;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: -0.025em;
   }
 
   /* Field wrapper */
   &__field {
-    margin-bottom: $spacing-05;
+    margin-bottom: $spacing-06;
+
+    &:last-of-type {
+      margin-bottom: $spacing-05;
+    }
 
     /* TextInput styling */
     .cds--text-input,
@@ -35,10 +43,11 @@
     .cds--text-input {
       background-color: $field-01;
       border: 1px solid $border-strong-01;
-      border-radius: 0.25rem;
-      padding: $spacing-04 $spacing-05;
+      border-radius: 0.375rem;
+      padding: $spacing-05 $spacing-05;
       font-size: 0.875rem;
       line-height: 1.25rem;
+      min-height: 2.5rem;
       transition: all 0.2s ease-in-out;
 
       &:focus {
