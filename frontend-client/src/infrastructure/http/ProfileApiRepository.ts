@@ -2,7 +2,7 @@ import type { ProfileRepository } from "../../domain/profile/repositories/Profil
 import type { ProfileRequest } from "../../domain/profile/dto/ProfileRequest";
 import { HttpClient } from "./HttpClient";
 import { env } from "../config/env";
-import { MockProfileApiService } from "../../shared/mockData";
+import { MockProfileApiService } from "../../mocks/mockData";
 
 export class ProfileApiRepository implements ProfileRepository {
   private readonly http: HttpClient;
