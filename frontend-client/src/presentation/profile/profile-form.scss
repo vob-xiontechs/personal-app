@@ -99,9 +99,9 @@
 
       /* Disabled State */
       &:disabled {
-        background: $field-disabled;
-        border-color: $border-disabled;
-        color: $text-disabled;
+        background: rgba(141, 141, 141, 0.1);
+        border-color: rgba(141, 141, 141, 0.3);
+        color: rgba(141, 141, 141, 0.5);
         cursor: not-allowed;
       }
     }
