@@ -2,7 +2,7 @@ import type { ProfileRepository } from "../../domain/profile/repositories/Profil
 import type { ProfileRequest } from "../../domain/profile/dto/ProfileRequest";
 import { HttpClient } from "./HttpClient";
 import { env } from "../config/env";
-import { MockProfileApiService } from "../../mocks/mockData";
+import { ProfileMockService } from "../../mocks/profileMocks";
 
 export class ProfileApiRepository implements ProfileRepository {
   private readonly http: HttpClient;
@@ -16,7 +16,7 @@ export class ProfileApiRepository implements ProfileRepository {
   async create(request: ProfileRequest): Promise<void> {
     if (this.useMock) {
       // Use mock data for testing
-      return MockProfileApiService.createProfile(request);
+      return ProfileMockService.createProfile(request);
     }
 
     // Real API call (when not using mock)
