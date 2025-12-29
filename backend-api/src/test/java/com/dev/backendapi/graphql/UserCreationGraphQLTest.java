@@ -12,7 +12,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.dev.backendapi.TestDocumentationListener;
+import com.dev.backendapi.config.GraphQLConfig;
 import com.dev.backendapi.config.TestSecurityConfig;
+import com.dev.backendapi.graphql.dto.UserDto;
 import com.dev.backendapi.io.ProfileResponse;
 import com.dev.backendapi.service.ProfileService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +25,7 @@ import static org.mockito.Mockito.when;
 @WebMvcTest(value = UserController.class, excludeAutoConfiguration = {
     org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
 })
-@Import(TestSecurityConfig.class)
+@Import({TestSecurityConfig.class, GraphQLConfig.class})
 class UserCreationGraphQLTest {
 
     @RegisterExtension
