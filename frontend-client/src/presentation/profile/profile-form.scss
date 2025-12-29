@@ -1,0 +1,40 @@
+/* Carbon core */
+@use "@carbon/styles/scss/theme" as *;
+@use "@carbon/styles/scss/spacing" as *;
+@use "@carbon/styles/scss/type" as *;
+@use "@carbon/styles/scss/colors" as *;
+
+/* Block */
+.profile-form {
+  max-width: 28rem;
+  margin: $spacing-09 auto;
+  padding: $spacing-07;
+
+  background-color: $layer-01;
+  border-radius: 0.25rem;
+
+  /* Title */
+  &__title {
+    @include type-style("productive-heading-03");
+    color: $text-primary;
+    margin-bottom: $spacing-06;
+  }
+
+  /* Field wrapper */
+  &__field {
+    margin-bottom: $spacing-05;
+  }
+
+  /* Error message */
+  &__error {
+    @include type-style("body-compact-01");
+    color: $text-error;
+    margin-top: $spacing-03;
+    margin-bottom: $spacing-05;
+  }
+
+  /* Action area */
+  &__actions {
+    margin-top: $spacing-06;
+  }
+}

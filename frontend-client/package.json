@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "@carbon/react": "^1.97.0",
+    "@carbon/styles": "^1.96.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -25,6 +27,7 @@
     "globals": "^16.5.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
+    "sass": "1.77.6",
     "vite": "^7.2.4"
   }
 }
