@@ -8,3 +8,12 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+# GraphQL Configuration
+graphql:
+  servlet:
+    mapping: /graphql
+    enabled: true
+  graphiql:
+    mapping: /graphiql
+    enabled: true

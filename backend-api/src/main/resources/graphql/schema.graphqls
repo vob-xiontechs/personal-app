@@ -1,0 +1,55 @@
+type Query {
+    # Get user by ID
+    user(id: ID!): User
+
+    # Get all users with pagination
+    users(page: Int = 0, size: Int = 10): UserConnection!
+
+    # Get current authenticated user
+    me: User
+}
+
+type Mutation {
+    # Register a new user
+    registerUser(input: RegisterUserInput!): User!
+
+    # Update user profile
+    updateUser(id: ID!, input: UpdateUserInput!): User!
+
+    # Delete user
+    deleteUser(id: ID!): Boolean!
+}
+
+type User {
+    id: ID!
+    userId: String!
+    name: String!
+    email: String!
+    isAccountVerified: Boolean!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+}
+
+type UserConnection {
+    content: [User!]!
+    totalElements: Int!
+    totalPages: Int!
+    size: Int!
+    number: Int!
+    first: Boolean!
+    last: Boolean!
+}
+
+input RegisterUserInput {
+    name: String!
+    email: String!
+    password: String!
+}
+
+input UpdateUserInput {
+    name: String
+    email: String
+    isAccountVerified: Boolean
+}
+
+scalar DateTime
