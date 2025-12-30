@@ -11,19 +11,9 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
   jpa:
-    properties:
-      jakarta.persistence.jdbc.url: jdbc:mysql://localhost:3307/develop_db?useSSL=false&serverTimezone=UTC
-      jakarta.persistence.jdbc.user: develop_user
-      jakarta.persistence.jdbc.password: develop_pass
-      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: update
     show-sql: true
-  # Disable security and GraphQL auto-configuration for testing
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.graphql.GraphQlAutoConfiguration
-      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 
 server:
   port: 8081

@@ -1,5 +1,5 @@
 # 1. Base image
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:21-jdk-alpine
 
 # 2. Thiết lập thư mục làm việc
 WORKDIR /app
