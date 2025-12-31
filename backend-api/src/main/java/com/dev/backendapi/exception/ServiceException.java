@@ -1,16 +1,18 @@
 package com.dev.backendapi.exception;
 
+import com.dev.backendapi.config.ErrorMessageConfig;
+
 public class ServiceException extends BaseException {
 
-    public ServiceException(String message) {
-        super(message, "SERVICE_ERROR", "SERVICE");
+    public ServiceException(String errorCode, ErrorMessageConfig config) {
+        super(errorCode, "SERVICE", config);
     }
 
-    public ServiceException(String message, Throwable cause) {
-        super(message, cause, "SERVICE_ERROR", "SERVICE");
+    public ServiceException(String errorCode, ErrorMessageConfig config, Throwable cause) {
+        super(errorCode, "SERVICE", config, cause);
     }
 
-    public ServiceException(String message, String errorCode) {
-        super(message, errorCode, "SERVICE");
+    public ServiceException(String customMessage, String errorCode, ErrorMessageConfig config) {
+        super(customMessage, errorCode, "SERVICE", config);
     }
 }

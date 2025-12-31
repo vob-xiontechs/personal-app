@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dev.backendapi.config.ErrorMessageConfig;
 import com.dev.backendapi.entity.UserEntity;
 import com.dev.backendapi.exception.BusinessException;
 import com.dev.backendapi.io.ProfileRequest;
@@ -18,13 +19,14 @@ import lombok.RequiredArgsConstructor;
 public class ProfileServiceImpl implements ProfileService{
 
     private final UserRepository userRepository;
+    private final ErrorMessageConfig errorMessageConfig;
 
     @Override
     @Transactional
     public ProfileResponse createProfile(ProfileRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new BusinessException("Email already exists");
+            throw new BusinessException("EMAIL_EXISTS", errorMessageConfig);
         }
 
         UserEntity newProfile = convertToUserEntity(request);

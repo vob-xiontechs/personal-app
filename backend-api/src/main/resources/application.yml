@@ -12,11 +12,35 @@ spring:
 # Application Configuration
 # Welcome page is now rendered using Thymeleaf HTML template
 
-# GraphQL Configuration
-graphql:
-  servlet:
-    mapping: /graphql
-    enabled: true
-  graphiql:
-    mapping: /graphiql
-    enabled: true
+# Error Messages Configuration by Layer
+app:
+  errors:
+    layers:
+      BUSINESS:
+        BUSINESS_ERROR: "Business rule violation occurred"
+        EMAIL_EXISTS: "Email address is already registered"
+        INVALID_OPERATION: "Operation cannot be performed"
+      SERVICE:
+        SERVICE_ERROR: "Service processing error"
+        VALIDATION_FAILED: "Input validation failed"
+        BUSINESS_LOGIC_ERROR: "Business logic processing failed"
+      REPOSITORY:
+        REPOSITORY_ERROR: "Database operation failed"
+        CONNECTION_ERROR: "Database connection error"
+        CONSTRAINT_VIOLATION: "Data constraint violation"
+        DATA_INTEGRITY_ERROR: "Data integrity error"
+      CONTROLLER:
+        CONTROLLER_ERROR: "Request processing error"
+        INVALID_REQUEST: "Invalid request format"
+        MISSING_PARAMETER: "Required parameter is missing"
+      VALIDATION:
+        VALIDATION_ERROR: "Input validation error"
+        FIELD_VALIDATION_ERROR: "Field validation failed"
+        CONSTRAINT_VIOLATION: "Validation constraint violated"
+      ENTITY:
+        ENTITY_ERROR: "Entity processing error"
+        ENTITY_NOT_FOUND: "Entity not found"
+        ENTITY_VALIDATION_ERROR: "Entity validation failed"
+      INFRASTRUCTURE:
+        INFRASTRUCTURE_ERROR: "Infrastructure error"
+        EXTERNAL_SERVICE_ERROR: "External service unavailable"

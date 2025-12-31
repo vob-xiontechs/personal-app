@@ -1,0 +1,81 @@
+# Error Messages Configuration by Layer
+# This file contains configurable error messages for different application layers
+# Each layer has specific error codes with corresponding messages
+
+app:
+  errors:
+    messages:
+      # Business Layer Errors - Business rule violations
+      BUSINESS:
+        BUSINESS_ERROR: "Business rule violation occurred"
+        EMAIL_EXISTS: "Email address is already registered"
+        INVALID_OPERATION: "Operation cannot be performed"
+        INSUFFICIENT_PERMISSIONS: "Insufficient permissions for this operation"
+        RESOURCE_NOT_AVAILABLE: "Requested resource is not available"
+
+      # Service Layer Errors - Business logic processing
+      SERVICE:
+        SERVICE_ERROR: "Service processing error"
+        VALIDATION_FAILED: "Input validation failed"
+        BUSINESS_LOGIC_ERROR: "Business logic processing failed"
+        EXTERNAL_SERVICE_ERROR: "External service communication failed"
+        TIMEOUT_ERROR: "Operation timed out"
+
+      # Repository Layer Errors - Data access operations
+      REPOSITORY:
+        REPOSITORY_ERROR: "Database operation failed"
+        CONNECTION_ERROR: "Database connection error"
+        CONSTRAINT_VIOLATION: "Data constraint violation"
+        DATA_INTEGRITY_ERROR: "Data integrity error"
+        DUPLICATE_KEY_ERROR: "Duplicate key violation"
+        FOREIGN_KEY_ERROR: "Foreign key constraint violation"
+
+      # Controller Layer Errors - HTTP request processing
+      CONTROLLER:
+        CONTROLLER_ERROR: "Request processing error"
+        INVALID_REQUEST: "Invalid request format"
+        MISSING_PARAMETER: "Required parameter is missing"
+        INVALID_REQUEST_BODY: "Invalid request body"
+        UNSUPPORTED_CONTENT_TYPE: "Unsupported content type"
+
+      # Validation Layer Errors - Input validation
+      VALIDATION:
+        VALIDATION_ERROR: "Input validation error"
+        FIELD_VALIDATION_ERROR: "Field validation failed"
+        REQUIRED_FIELD_MISSING: "Required field is missing"
+        INVALID_FIELD_FORMAT: "Invalid field format"
+        FIELD_TOO_LONG: "Field value is too long"
+        FIELD_TOO_SHORT: "Field value is too short"
+
+      # Entity Layer Errors - Domain object processing
+      ENTITY:
+        ENTITY_ERROR: "Entity processing error"
+        ENTITY_NOT_FOUND: "Entity not found"
+        ENTITY_VALIDATION_ERROR: "Entity validation failed"
+        ENTITY_CONSTRAINT_ERROR: "Entity constraint violation"
+        ENTITY_STATE_ERROR: "Invalid entity state"
+
+      # Infrastructure Layer Errors - External systems
+      INFRASTRUCTURE:
+        INFRASTRUCTURE_ERROR: "Infrastructure error"
+        EXTERNAL_SERVICE_ERROR: "External service unavailable"
+        CONFIGURATION_ERROR: "Configuration error"
+        NETWORK_ERROR: "Network communication error"
+        CACHE_ERROR: "Cache operation failed"
+        MESSAGE_QUEUE_ERROR: "Message queue error"
+
+    # Layer descriptions for better error context
+    layers:
+      BUSINESS: "Business Logic Layer"
+      SERVICE: "Service Layer"
+      REPOSITORY: "Data Access Layer"
+      CONTROLLER: "Presentation Layer"
+      VALIDATION: "Validation Layer"
+      ENTITY: "Domain Entity Layer"
+      INFRASTRUCTURE: "Infrastructure Layer"
+
+    # Default error messages for fallback
+    defaults:
+      UNKNOWN_ERROR: "An unknown error occurred"
+      SYSTEM_ERROR: "System error occurred"
+      INTERNAL_ERROR: "Internal server error"

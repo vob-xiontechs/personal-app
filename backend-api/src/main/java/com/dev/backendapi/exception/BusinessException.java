@@ -1,16 +1,18 @@
 package com.dev.backendapi.exception;
 
+import com.dev.backendapi.config.ErrorMessageConfig;
+
 public class BusinessException extends BaseException {
 
-    public BusinessException(String message) {
-        super(message, "BUSINESS_ERROR", "BUSINESS");
+    public BusinessException(String errorCode, ErrorMessageConfig config) {
+        super(errorCode, "BUSINESS", config);
     }
 
-    public BusinessException(String message, Throwable cause) {
-        super(message, cause, "BUSINESS_ERROR", "BUSINESS");
+    public BusinessException(String errorCode, ErrorMessageConfig config, Throwable cause) {
+        super(errorCode, "BUSINESS", config, cause);
     }
 
-    public BusinessException(String message, String errorCode) {
-        super(message, errorCode, "BUSINESS");
+    public BusinessException(String customMessage, String errorCode, ErrorMessageConfig config) {
+        super(customMessage, errorCode, "BUSINESS", config);
     }
 }
