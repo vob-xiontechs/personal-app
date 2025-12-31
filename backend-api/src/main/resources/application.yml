@@ -8,6 +8,14 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  web:
+    resources:
+      # Handle static resources gracefully
+      static-locations: classpath:/static/,classpath:/public/,classpath:/resources/,classpath:/META-INF/resources/
+      # Add cache control for static resources
+      cache:
+        cachecontrol:
+          max-age: 1d
 
 # Application Configuration
 # Welcome page is now rendered using Thymeleaf HTML template
@@ -44,3 +52,17 @@ app:
       INFRASTRUCTURE:
         INFRASTRUCTURE_ERROR: "Infrastructure error"
         EXTERNAL_SERVICE_ERROR: "External service unavailable"
+
+# Logging Configuration
+logging:
+  level:
+    # Reduce favicon.ico related noise
+    org.springframework.web.servlet.resource.ResourceHttpRequestHandler: WARN
+    org.springframework.web.servlet.DispatcherServlet: WARN
+    # Application specific logging
+    com.dev.backendapi: INFO
+    com.dev.backendapi.controller: DEBUG
+    com.dev.backendapi.service: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
