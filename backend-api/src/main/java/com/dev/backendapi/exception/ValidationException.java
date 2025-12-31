@@ -2,15 +2,15 @@ package com.dev.backendapi.exception;
 
 public class ValidationException extends BaseException {
 
-    public ValidationException(String message) {
-        super(message, "VALIDATION_ERROR", "VALIDATION");
+    public ValidationException(String errorCode) {
+        super(errorCode, "VALIDATION");
     }
 
-    public ValidationException(String message, Throwable cause) {
-        super(message, cause, "VALIDATION_ERROR", "VALIDATION");
+    public ValidationException(String errorCode, Throwable cause) {
+        super(errorCode, "VALIDATION", cause);
     }
 
-    public ValidationException(String message, String errorCode) {
-        super(message, errorCode, "VALIDATION");
+    public ValidationException(String customMessage, String errorCode) {
+        super(customMessage, errorCode, "VALIDATION");
     }
 }

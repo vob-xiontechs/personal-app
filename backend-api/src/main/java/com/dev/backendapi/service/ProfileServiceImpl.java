@@ -26,7 +26,7 @@ public class ProfileServiceImpl implements ProfileService{
     public ProfileResponse createProfile(ProfileRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new BusinessException("EMAIL_EXISTS", errorMessageConfig);
+            throw new BusinessException("EMAIL_EXISTS");
         }
 
         UserEntity newProfile = convertToUserEntity(request);

@@ -2,15 +2,15 @@ package com.dev.backendapi.exception;
 
 public class InfrastructureException extends BaseException {
 
-    public InfrastructureException(String message) {
-        super(message, "INFRASTRUCTURE_ERROR", "INFRASTRUCTURE");
+    public InfrastructureException(String errorCode) {
+        super(errorCode, "INFRASTRUCTURE");
     }
 
-    public InfrastructureException(String message, Throwable cause) {
-        super(message, cause, "INFRASTRUCTURE_ERROR", "INFRASTRUCTURE");
+    public InfrastructureException(String errorCode, Throwable cause) {
+        super(errorCode, "INFRASTRUCTURE", cause);
     }
 
-    public InfrastructureException(String message, String errorCode) {
-        super(message, errorCode, "INFRASTRUCTURE");
+    public InfrastructureException(String customMessage, String errorCode) {
+        super(customMessage, errorCode, "INFRASTRUCTURE");
     }
 }
