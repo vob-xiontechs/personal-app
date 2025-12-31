@@ -69,14 +69,27 @@ public class UserController {
 
     @MutationMapping
     public UserDto registerUser(@Argument RegisterUserInput input) {
-        ProfileRequest request = new ProfileRequest(
-            input.name(),
-            input.email(),
-            input.password()
-        );
+        System.out.println("📝 GraphQL registerUser called with: " + input.name() + ", " + input.email());
 
-        ProfileResponse profile = profileService.createProfile(request);
-        return UserDto.fromProfileResponse(profile);
+        try {
+            ProfileRequest request = new ProfileRequest(
+                input.name(),
+                input.email(),
+                input.password()
+            );
+
+            System.out.println("🔄 Calling profileService.createProfile()");
+            ProfileResponse profile = profileService.createProfile(request);
+
+            System.out.println("✅ Profile created successfully: " + profile.getUserId());
+            UserDto result = UserDto.fromProfileResponse(profile);
+            System.out.println("✅ UserDto created: " + result.id());
+            return result;
+        } catch (Exception e) {
+            System.out.println("❌ Exception in registerUser: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
+            throw e; // Re-throw to let GraphQL handle it
+        }
     }
 
     @MutationMapping

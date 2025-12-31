@@ -1,13 +1,11 @@
 package com.dev.backendapi.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-
 import java.util.Map;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
 @Configuration
-@PropertySource("classpath:error-messages.yml")
 @ConfigurationProperties(prefix = "app.errors")
 public class ErrorMessageConfig {
 
@@ -43,19 +41,29 @@ public class ErrorMessageConfig {
      * Get error message for specific layer and error code
      */
     public String getMessage(String layer, String errorCode) {
+        System.out.println("🔍 Getting message for layer: " + layer + ", code: " + errorCode);
+        System.out.println("📋 Messages map: " + (messages != null ? messages.keySet() : "null"));
+
         if (messages != null && messages.containsKey(layer)) {
             Map<String, String> layerMessages = messages.get(layer);
+            System.out.println("📋 Layer messages for " + layer + ": " + (layerMessages != null ? layerMessages.keySet() : "null"));
+
             if (layerMessages != null && layerMessages.containsKey(errorCode)) {
-                return layerMessages.get(errorCode);
+                String message = layerMessages.get(errorCode);
+                System.out.println("✅ Found message: " + message);
+                return message;
             }
         }
 
         // Fallback to defaults
         if (defaults != null && defaults.containsKey(errorCode)) {
-            return defaults.get(errorCode);
+            String defaultMessage = defaults.get(errorCode);
+            System.out.println("⚠️ Using default message: " + defaultMessage);
+            return defaultMessage;
         }
 
         // Ultimate fallback
+        System.out.println("❌ No message found, using fallback");
         return "An error occurred";
     }
 

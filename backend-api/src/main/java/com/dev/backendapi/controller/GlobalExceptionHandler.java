@@ -19,6 +19,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<Map<String, Object>> handleBaseException(BaseException ex) {
+        System.out.println("🎯 Handling BaseException: " + ex.getClass().getSimpleName());
+        System.out.println("📋 Error Code: " + ex.getErrorCode());
+        System.out.println("📋 Layer: " + ex.getLayer());
+        System.out.println("📋 Message: " + ex.getMessage());
+
         Map<String, Object> error = new HashMap<>();
         error.put("error", ex.getMessage());
         error.put("type", ex.getErrorCode());
@@ -58,6 +63,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
+        System.out.println("🚨 Handling Generic Exception: " + ex.getClass().getSimpleName());
+        System.out.println("📋 Exception Message: " + ex.getMessage());
+        ex.printStackTrace();
+
         Map<String, String> error = new HashMap<>();
         error.put("error", "Internal server error");
         error.put("type", "GENERIC_ERROR");

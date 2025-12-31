@@ -1,0 +1,165 @@
+// ==========================================================================
+// Advanced Design System with Dynamic Theming
+// ==========================================================================
+
+// CSS Custom Properties for Dynamic Theming
+:root {
+  // Primary Brand Colors
+  --color-primary: #3b82f6;
+  --color-primary-hover: #2563eb;
+  --color-primary-focus: rgba(59, 130, 246, 0.1);
+
+  // Semantic Colors
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  // Neutral Colors
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+  --color-gray-300: #d1d5db;
+  --color-gray-400: #9ca3af;
+  --color-gray-500: #6b7280;
+  --color-gray-600: #4b5563;
+  --color-gray-700: #374151;
+  --color-gray-800: #1f2937;
+  --color-gray-900: #111827;
+
+  // Surface Colors
+  --color-surface-primary: var(--color-white);
+  --color-surface-secondary: var(--color-gray-50);
+  --color-surface-tertiary: var(--color-gray-100);
+
+  // Text Colors
+  --color-text-primary: var(--color-gray-900);
+  --color-text-secondary: var(--color-gray-600);
+  --color-text-tertiary: var(--color-gray-400);
+  --color-text-inverse: var(--color-white);
+
+  // Border Colors
+  --color-border-primary: var(--color-gray-200);
+  --color-border-secondary: var(--color-gray-300);
+  --color-border-focus: var(--color-primary);
+
+  // Shadow System
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+  // Animation System
+  --animation-duration-fast: 150ms;
+  --animation-duration-normal: 300ms;
+  --animation-duration-slow: 500ms;
+  --animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Fallback SCSS Variables for Legacy Support
+$color-white: var(--color-white);
+$color-black: var(--color-black);
+$color-gray-50: var(--color-gray-50);
+$color-gray-100: var(--color-gray-100);
+$color-gray-200: var(--color-gray-200);
+$color-gray-300: var(--color-gray-300);
+$color-gray-400: var(--color-gray-400);
+$color-gray-500: var(--color-gray-500);
+$color-gray-600: var(--color-gray-600);
+$color-gray-700: var(--color-gray-700);
+$color-gray-800: var(--color-gray-800);
+$color-gray-900: var(--color-gray-900);
+
+$color-blue-500: var(--color-primary);
+$color-blue-600: var(--color-primary-hover);
+$color-red-500: var(--color-error);
+$color-red-600: var(--color-error);
+
+// Carbon Spacing Scale (100% compliant)
+$spacing-01: 0.125rem;  // 2px
+$spacing-02: 0.25rem;   // 4px
+$spacing-03: 0.5rem;    // 8px
+$spacing-04: 0.75rem;   // 12px
+$spacing-05: 1rem;      // 16px
+$spacing-06: 1.5rem;    // 24px
+$spacing-07: 2rem;      // 32px
+$spacing-08: 2.5rem;    // 40px
+$spacing-09: 3rem;      // 48px
+$spacing-10: 4rem;      // 64px
+$spacing-11: 5rem;      // 80px
+$spacing-12: 6rem;      // 96px
+$spacing-13: 10rem;     // 160px
+
+// Legacy spacing mappings for compatibility
+$spacing-xs: $spacing-02;
+$spacing-sm: $spacing-03;
+$spacing-md: $spacing-04;
+$spacing-lg: $spacing-05;
+$spacing-xl: $spacing-06;
+$spacing-2xl: $spacing-07;
+$spacing-3xl: $spacing-08;
+$spacing-4xl: $spacing-09;
+
+// Carbon Border Radius
+$border-radius: 0.25rem;     // 4px (small)
+$border-radius-md: 0.5rem;   // 8px (medium)
+$border-radius-lg: 0.75rem;  // 12px (large)
+
+// Carbon Typography Scale (100% compliant)
+$font-size-01: 0.75rem;   // 12px - label
+$font-size-02: 0.875rem;  // 14px - body short
+$font-size-03: 1rem;      // 16px - body, button
+$font-size-04: 1.125rem;  // 18px - heading compact
+$font-size-05: 1.25rem;   // 20px - heading
+$font-size-06: 1.5rem;    // 24px - heading large
+$font-size-07: 2rem;      // 32px - heading extra large
+$font-size-08: 2.5rem;    // 40px - display
+$font-size-09: 3rem;      // 48px - display large
+$font-size-10: 3.5rem;    // 56px - display extra large
+$font-size-11: 4.75rem;   // 76px - display 2x large
+
+// Legacy font size mappings
+$font-size-xs: $font-size-01;
+$font-size-sm: $font-size-02;
+$font-size-base: $font-size-03;
+$font-size-lg: $font-size-04;
+$font-size-xl: $font-size-05;
+$font-size-2xl: $font-size-06;
+$font-size-3xl: $font-size-07;
+$font-size-4xl: $font-size-08;
+
+// Font families
+$font-family-primary: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+
+// Font weights
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Line heights
+$line-height-tight: 1.25;
+$line-height-snug: 1.375;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.625;
+
+// Transitions
+$transition-fast: 0.15s ease-in-out;
+$transition-normal: 0.3s ease-in-out;
+
+// Shadows
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+// Breakpoints
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;

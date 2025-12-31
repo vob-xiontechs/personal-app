@@ -1,0 +1,110 @@
+// ==========================================================================
+// Main SCSS Entry Point
+// ==========================================================================
+
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+// Variables and Mixins
+@import './presentation/profile/variables';
+@import './presentation/profile/mixins';
+
+// ==========================================================================
+// Global Styles
+// ==========================================================================
+
+:root {
+  font-family: $font-family-primary;
+  line-height: $line-height-normal;
+  font-weight: $font-weight-normal;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: $font-weight-medium;
+  color: #646cff;
+  text-decoration: inherit;
+
+  &:hover {
+    color: #535bf2;
+  }
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: $color-gray-100;
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      color: #213547;
+      background-color: #ffffff;
+    }
+
+    a:hover {
+      color: #747bff;
+    }
+
+    button {
+      background-color: #f9f9f9;
+    }
+  }
+}
+
+h1 {
+  font-size: $font-size-4xl;
+  line-height: $line-height-tight;
+}
+
+button {
+  border-radius: $border-radius-lg;
+  border: 1px solid transparent;
+  padding: $spacing-sm $spacing-lg;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color $transition-normal;
+
+  &:hover {
+    border-color: #646cff;
+  }
+
+  &:focus,
+  &:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+  }
+}
+
+// ==========================================================================
+// Layout
+// ==========================================================================
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+// ==========================================================================
+// Component Styles
+// ==========================================================================
+
+@import './presentation/profile/profile-form';

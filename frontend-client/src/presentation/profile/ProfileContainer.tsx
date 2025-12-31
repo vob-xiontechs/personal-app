@@ -3,12 +3,14 @@ import { ProfileForm } from "./ProfileForm";
 import { ProfilePresenter } from "./ProfilePresenter";
 import { CreateProfileUseCase } from "../../application/profile/CreateProfileUseCase";
 import { ProfileApiRepository } from "../../infrastructure/http/ProfileApiRepository";
-import { HttpClient } from "../../infrastructure/http/HttpClient";
 import { ProfileDomainService } from "../../domain/profile/services/ProfileDomainService";
 
 export const ProfileContainer = () => {
+  // Use only REST API with Axios
+  const [repository] = useState(() => new ProfileApiRepository());
+
   const useCase = new CreateProfileUseCase(
-    new ProfileApiRepository(new HttpClient(), false),
+    repository,
     new ProfileDomainService()
   );
 

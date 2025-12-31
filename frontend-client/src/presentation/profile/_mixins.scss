@@ -1,0 +1,240 @@
+// ==========================================================================
+// Advanced Mixins - Utility-First Architecture
+// ==========================================================================
+
+// =============================================================================
+// FOCUS & INTERACTION MIXINS
+// =============================================================================
+
+// Advanced focus ring with customizable properties
+@mixin focus-ring($color: var(--color-primary), $width: 3px, $offset: 0) {
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 calc(#{$width} + #{$offset}) $color,
+      0 0 0 calc(#{$width} + #{$offset} + 2px) rgba($color, 0.3);
+  }
+}
+
+// Enhanced focus for inputs with animation
+@mixin input-focus($color: var(--color-primary)) {
+  &:focus {
+    outline: none;
+    border-color: $color;
+    box-shadow:
+      0 0 0 3px rgba($color, 0.1),
+      inset 0 1px 2px rgba($color, 0.05);
+    transform: translateY(-1px);
+  }
+}
+
+// =============================================================================
+// COMPONENT BASE MIXINS
+// =============================================================================
+
+// Button variants with consistent behavior
+@mixin button-variant($bg-color, $text-color: var(--color-white), $hover-bg: null, $shadow: null) {
+  background: $bg-color;
+  color: $text-color;
+  border: none;
+  cursor: pointer;
+  transition: all var(--animation-duration-fast) var(--animation-easing);
+
+  @if $shadow {
+    box-shadow: $shadow;
+  }
+
+  &:hover:not(:disabled) {
+    @if $hover-bg {
+      background: $hover-bg;
+    } @else {
+      background: lighten($bg-color, 5%);
+    }
+
+    @if $shadow {
+      box-shadow: 0 4px 12px rgba($bg-color, 0.4);
+    }
+
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba($bg-color, 0.2);
+  }
+
+  &:disabled {
+    background: var(--color-gray-300);
+    color: var(--color-gray-400);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  @include focus-ring($bg-color);
+}
+
+// Input field with advanced styling
+@mixin input-field($height: $spacing-4xl, $border-radius: $border-radius) {
+  display: block;
+  width: 100%;
+  height: $height;
+  padding: 0 $spacing-md;
+  background: var(--color-surface-primary);
+  border: 2px solid var(--color-border-secondary);
+  border-radius: $border-radius;
+  color: var(--color-text-primary);
+  font-size: $font-size-base;
+  font-family: $font-family-primary;
+  transition: all var(--animation-duration-fast) var(--animation-easing);
+
+  &::placeholder {
+    color: var(--color-text-tertiary);
+    font-weight: $font-weight-normal;
+  }
+
+  @include input-focus;
+
+  &:hover:not(:focus) {
+    border-color: var(--color-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  &[data-invalid] {
+    border-color: var(--color-error);
+    background: rgba(var(--color-error), 0.02);
+
+    @include input-focus(var(--color-error));
+  }
+}
+
+// =============================================================================
+// LAYOUT & POSITIONING MIXINS
+// =============================================================================
+
+// Container with max-width and centering
+@mixin container($max-width: 28rem, $padding: $spacing-3xl) {
+  max-width: $max-width;
+  width: 100%;
+  padding: $padding;
+  margin: 0 auto;
+}
+
+// Flexbox utilities with modern features
+@mixin flex($direction: row, $align: center, $justify: center, $gap: null) {
+  display: flex;
+  flex-direction: $direction;
+  align-items: $align;
+  justify-content: $justify;
+
+  @if $gap {
+    gap: $gap;
+  }
+}
+
+// Grid system for forms
+@mixin form-grid($columns: 1, $gap: $spacing-lg) {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: $gap;
+  align-items: start;
+}
+
+// =============================================================================
+// ANIMATION & MICRO-INTERACTION MIXINS
+// =============================================================================
+
+// Staggered entrance animation
+@mixin stagger-entrance($delay: 0.1s) {
+  animation: slide-in-up 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+
+  @for $i from 1 through 10 {
+    &:nth-child(#{$i}) {
+      animation-delay: $delay * $i;
+    }
+  }
+}
+
+// Smooth morphing transitions
+@mixin morph-transition($properties: all, $duration: var(--animation-duration-normal)) {
+  transition: $properties $duration var(--animation-easing);
+}
+
+// =============================================================================
+// RESPONSIVE & MODERN CSS MIXINS
+// =============================================================================
+
+// Container queries (modern CSS)
+@mixin container-query($min-width, $content) {
+  @container (min-width: #{$min-width}) {
+    @content;
+  }
+}
+
+// Simplified responsive utilities
+@mixin tablet {
+  @media (min-width: 768px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: 1024px) {
+    @content;
+  }
+}
+
+// =============================================================================
+// UTILITY MIXINS
+// =============================================================================
+
+// Text utilities
+@mixin text-variant($size, $weight: $font-weight-normal, $color: var(--color-text-primary)) {
+  font-size: $size;
+  font-weight: $weight;
+  color: $color;
+  line-height: 1.5;
+}
+
+// Spacing utilities
+@mixin spacing($property, $size) {
+  #{$property}: $size;
+}
+
+// Elevation system
+@mixin elevation($level: 1) {
+  @if $level == 1 {
+    box-shadow: var(--shadow-sm);
+  } @else if $level == 2 {
+    box-shadow: var(--shadow);
+  } @else if $level == 3 {
+    box-shadow: var(--shadow-md);
+  } @else if $level == 4 {
+    box-shadow: var(--shadow-lg);
+  } @else if $level == 5 {
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+// =============================================================================
+// THEMING MIXINS
+// =============================================================================
+
+// Dynamic theming with CSS custom properties
+@mixin theme-variant($theme-name, $properties) {
+  @if $theme-name == dark {
+    @media (prefers-color-scheme: dark) {
+      @content;
+    }
+  } @else if $theme-name == light {
+    @media (prefers-color-scheme: light) {
+      @content;
+    }
+  } @else {
+    [data-theme="#{$theme-name}"] & {
+      @content;
+    }
+  }
+}
