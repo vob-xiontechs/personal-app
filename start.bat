@@ -28,10 +28,35 @@ REM Update .env with correct API URL
 echo ENVIRONMENT=%ENVIRONMENT%> frontend-client\.env
 echo VITE_API_BASE_URL=%VITE_API_BASE_URL%>> frontend-client\.env
 
+REM Build backend JAR
+echo 🔨 Building backend...
+cd backend-api
+call ./mvnw.cmd clean package -DskipTests
+if %errorlevel% neq 0 (
+    echo ❌ Backend build failed
+    cd ..
+    exit /b 1
+)
+cd ..
+
+REM Build Docker image
+echo 🐳 Building Docker image...
+cd %DOCKER_DIR%
+docker-compose build backend
+if %errorlevel% neq 0 (
+    echo ❌ Docker build failed
+    cd ..
+    exit /b 1
+)
+
 REM Start backend services
 echo 🏗️  Starting backend services...
-cd %DOCKER_DIR%
-docker-compose up --build -d
+docker-compose up -d backend
+if %errorlevel% neq 0 (
+    echo ❌ Backend start failed
+    cd ..
+    exit /b 1
+)
 
 REM Go back to root directory
 cd ..\..
