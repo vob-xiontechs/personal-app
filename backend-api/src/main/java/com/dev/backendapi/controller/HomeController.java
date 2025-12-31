@@ -9,6 +9,6 @@ public class HomeController {
 
     @GetMapping("/")
     public ResponseEntity<String> home() {
-        return ResponseEntity.ok("Welcome to Personal App Backend API! 🚀\n\nAvailable endpoints:\n- POST /api/v1.0/register\n- POST /graphql\n- GET /actuator/health");
+        return ResponseEntity.ok("Welcome to Personal App Backend API! 🚀\n\nAvailable endpoints:\n- POST /api/v1.0/register\n- POST /graphql\n- GET /actuator/health\n\nAPI Documentation:\n- Swagger UI: /swagger-ui.html\n- OpenAPI JSON: /v3/api-docs");
     }
 }
