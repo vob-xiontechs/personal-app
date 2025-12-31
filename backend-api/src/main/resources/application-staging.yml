@@ -12,9 +12,6 @@ spring:
     baseline-on-migrate: true
   jpa:
     properties:
-      jakarta.persistence.jdbc.url: jdbc:mysql://localhost:3307/develop_db?useSSL=false&serverTimezone=UTC
-      jakarta.persistence.jdbc.user: develop_user
-      jakarta.persistence.jdbc.password: develop_pass
       hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
       ddl-auto: update
@@ -22,3 +19,12 @@ spring:
 
 server:
   port: 8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always

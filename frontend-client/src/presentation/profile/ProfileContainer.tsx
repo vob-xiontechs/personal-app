@@ -8,7 +8,7 @@ import { ProfileDomainService } from "../../domain/profile/services/ProfileDomai
 
 export const ProfileContainer = () => {
   const useCase = new CreateProfileUseCase(
-    new ProfileApiRepository(new HttpClient()),
+    new ProfileApiRepository(new HttpClient(), false),
     new ProfileDomainService()
   );
 

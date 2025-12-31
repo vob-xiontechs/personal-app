@@ -19,15 +19,15 @@ export class ProfileApiRepository implements ProfileRepository {
       return ProfileMockService.createProfile(request);
     }
 
-    // Real API call (when not using mock)
-    try {
-      await this.http.post<void>(
-        `${env.API_BASE_URL}/api/profile`,
-        request
-      );
-    } catch (error: any) {
-      // HttpClient already handles error responses and throws appropriate errors
-      throw error;
-    }
+      // Real API call (when not using mock)
+      try {
+        await this.http.post<void>(
+          `${env.API_BASE_URL}/api/v1.0/register`,
+          request
+        );
+      } catch (error: any) {
+        // HttpClient already handles error responses and throws appropriate errors
+        throw error;
+      }
   }
 }

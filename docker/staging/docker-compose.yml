@@ -15,7 +15,8 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: mysql:8.1

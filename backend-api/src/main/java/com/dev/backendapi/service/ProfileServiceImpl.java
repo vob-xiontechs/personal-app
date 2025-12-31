@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.dev.backendapi.entity.UserEntity;
+import com.dev.backendapi.exception.BusinessException;
 import com.dev.backendapi.io.ProfileRequest;
 import com.dev.backendapi.io.ProfileResponse;
 import com.dev.backendapi.repository.UserRepository;
@@ -23,7 +24,7 @@ public class ProfileServiceImpl implements ProfileService{
     public ProfileResponse createProfile(ProfileRequest request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new BusinessException("Email already exists");
         }
 
         UserEntity newProfile = convertToUserEntity(request);
