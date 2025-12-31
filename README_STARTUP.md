@@ -24,6 +24,17 @@ This system is designed to ensure the Spring Boot backend is fully started befor
 - Disabled Spring Security in develop environment for easy testing
 - Configuration: `spring.security.enabled=false`
 
+### 5. Layered Exception Handling
+- Implemented comprehensive exception hierarchy for different layers
+- BaseException with errorCode and layer identification
+- Specific exceptions: ServiceException, BusinessException, RepositoryException, etc.
+- Enhanced error responses with layer information for better debugging
+
+### 6. Swagger/OpenAPI Documentation
+- Added springdoc-openapi-starter-webmvc-ui for API documentation
+- Configured Swagger UI with custom branding and server information
+- Added comprehensive API annotations for testing
+
 ## How to Use
 
 ### Windows (Batch script)
@@ -46,8 +57,13 @@ This system is designed to ensure the Spring Boot backend is fully started befor
 ## Ports
 
 - **Backend API**: http://localhost:8081
-- **Frontend**: http://localhost:3008
+- **Frontend**: http://localhost:3011 (or next available port)
 - **MySQL**: localhost:3307 (external), container port 3306
+
+## API Documentation
+
+- **Swagger UI**: http://localhost:8081/swagger-ui.html
+- **OpenAPI JSON**: http://localhost:8081/v3/api-docs
 
 ## Health Check Endpoints
 
