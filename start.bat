@@ -1,5 +1,5 @@
 @echo off
-echo 🚀 Starting Personal App...
+echo Starting Personal App...
 
 REM Read environment from .env
 for /f "tokens=1,2 delims==" %%a in (frontend-client\.env) do set %%a=%%b
@@ -29,31 +29,31 @@ echo ENVIRONMENT=%ENVIRONMENT%> frontend-client\.env
 echo VITE_API_BASE_URL=%VITE_API_BASE_URL%>> frontend-client\.env
 
 REM Build backend JAR
-echo 🔨 Building backend...
+echo Building backend...
 cd backend-api
 call ./mvnw.cmd clean package -DskipTests
 if %errorlevel% neq 0 (
-    echo ❌ Backend build failed
+    echo Backend build failed
     cd ..
     exit /b 1
 )
 cd ..
 
 REM Build Docker image
-echo 🐳 Building Docker image...
+echo Building Docker image...
 cd %DOCKER_DIR%
 docker-compose build backend
 if %errorlevel% neq 0 (
-    echo ❌ Docker build failed
+    echo Docker build failed
     cd ..
     exit /b 1
 )
 
 REM Start backend services
-echo 🏗️  Starting backend services...
+echo Starting backend services...
 docker-compose up -d backend
 if %errorlevel% neq 0 (
-    echo ❌ Backend start failed
+    echo Backend start failed
     cd ..
     exit /b 1
 )
@@ -66,7 +66,7 @@ set url=http://localhost:%BACKEND_PORT%/actuator/health
 set max_attempts=30
 set attempt=1
 
-echo ⏳ Waiting for backend to be ready...
+echo Waiting for backend to be ready...
 
 :check_loop
 if %attempt% gtr %max_attempts% goto :backend_failed
@@ -74,7 +74,7 @@ if %attempt% gtr %max_attempts% goto :backend_failed
 REM Check if backend health endpoint is accessible
 curl -s --max-time 5 "%url%" >nul 2>&1
 if %errorlevel% equ 0 (
-    echo ✅ Backend is ready!
+    echo Backend is ready!
     goto :start_frontend
 )
 
@@ -84,12 +84,12 @@ set /a attempt+=1
 goto :check_loop
 
 :backend_failed
-echo ❌ Backend failed to start within expected time
+echo Backend failed to start within expected time
 exit /b 1
 
 :start_frontend
-echo 🎉 Backend is fully started!
-echo 🌐 Starting frontend...
+echo Backend is fully started!
+echo Starting frontend...
 
 REM Open backend in browser
 start http://localhost:%BACKEND_PORT%/actuator/health
