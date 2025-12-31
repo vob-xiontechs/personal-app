@@ -62,8 +62,8 @@ This system is designed to ensure the Spring Boot backend is fully started befor
 
 ## API Documentation
 
-- **Swagger UI**: http://localhost:8081/swagger-ui.html (or http://localhost:8081/swagger)
-- **OpenAPI JSON**: http://localhost:8081/v3/api-docs (or http://localhost:8081/api-docs)
+- **Swagger UI**: http://localhost:8081/swagger-ui.html
+- **OpenAPI JSON**: http://localhost:8081/v3/api-docs
 
 ## Health Check Endpoints
 
