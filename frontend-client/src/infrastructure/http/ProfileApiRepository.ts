@@ -39,7 +39,7 @@ export class ProfileApiRepository implements ProfileRepository {
   async create(request: ProfileRequest): Promise<void> {
     try {
       const response: AxiosResponse = await this.axiosInstance.post(
-        '/api/v1.0/register',
+        '/api/v1.0/profiles/register',
         request
       );
 
