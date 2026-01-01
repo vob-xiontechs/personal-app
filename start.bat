@@ -1,103 +1,123 @@
 @echo off
-echo Starting Personal App...
+setlocal enabledelayedexpansion
 
-REM Read environment from .env
-for /f "tokens=1,2 delims==" %%a in (frontend-client\.env) do set %%a=%%b
+REM ============================================
+REM Personal App - Optimized Startup Script
+REM Sequential execution with smart fallbacks
+REM ============================================
 
-echo Environment: %ENVIRONMENT%
+REM ===== CONFIG =====
+set "APP_NAME=Personal App"
+set "DEFAULT_ENV=develop"
+set "ENV_FILE=frontend-client\.env"
+set "BACKEND_DIR=backend-api"
+set "FRONTEND_DIR=frontend-client"
+set "HEALTH_URL=http://localhost:8081/actuator/health"
+set "FRONTEND_URL=http://localhost:3011"
 
-REM Set environment-specific variables
-if "%ENVIRONMENT%"=="develop" (
-    set DOCKER_DIR=docker\develop
-    set BACKEND_PORT=8081
-    set FRONTEND_PORT=3011
-    set VITE_API_BASE_URL=http://localhost:8081
-) else (
-    if "%ENVIRONMENT%"=="staging" (
-        set DOCKER_DIR=docker\staging
-        set BACKEND_PORT=8082
-        set FRONTEND_PORT=3011
-        set VITE_API_BASE_URL=http://localhost:8082
-    ) else (
-        echo Invalid ENVIRONMENT in .env. Use 'develop' or 'staging'.
-        exit /b 1
-    )
+REM ===== INIT =====
+echo Starting %APP_NAME%...
+
+REM Read environment
+for /f "tokens=1,2 delims==" %%a in (%ENV_FILE%) do (
+    if "%%a"=="ENVIRONMENT" set "ENVIRONMENT=%%b"
 )
 
-REM Update .env with correct API URL
-echo ENVIRONMENT=%ENVIRONMENT%> frontend-client\.env
-echo VITE_API_BASE_URL=%VITE_API_BASE_URL%>> frontend-client\.env
+REM Set defaults
+if "%ENVIRONMENT%"=="" set "ENVIRONMENT=%DEFAULT_ENV%"
 
-REM Build backend JAR
+REM Configure environment
+if "%ENVIRONMENT%"=="develop" (
+    set "BACKEND_PORT=8081"
+    set "FRONTEND_PORT=3011"
+    set "DOCKER_DIR=docker\develop"
+) else if "%ENVIRONMENT%"=="staging" (
+    set "BACKEND_PORT=8082"
+    set "FRONTEND_PORT=3012"
+    set "DOCKER_DIR=docker\staging"
+) else (
+    set "BACKEND_PORT=8081"
+    set "FRONTEND_PORT=3011"
+    set "DOCKER_DIR=docker\develop"
+)
+
+REM Update frontend config
+echo ENVIRONMENT=%ENVIRONMENT%> "%ENV_FILE%"
+echo VITE_API_BASE_URL=http://localhost:%BACKEND_PORT%>> "%ENV_FILE%"
+
+REM ===== BACKEND BUILD =====
 echo Building backend...
-cd backend-api
-call ./mvnw.cmd clean package -DskipTests
-if %errorlevel% neq 0 (
-    echo Backend build failed
+
+REM Show timeout warning
+echo [INFO] Build timeout: 5 minutes (press Ctrl+C to cancel if needed)
+cd "%BACKEND_DIR%"
+
+REM Incremental build if JAR exists
+if exist "target\*.jar" (
+    echo Incremental build...
+    call ./mvnw.cmd package -DskipTests -Dmaven.compiler.useIncrementalCompilation=true -q
+) else (
+    echo Clean build...
+    call ./mvnw.cmd clean package -DskipTests -q
+)
+
+REM Verify build success
+if errorlevel 1 (
+    echo [ERROR] Backend build failed
     cd ..
     exit /b 1
 )
+
+REM Verify JAR exists
+if not exist "target\*.jar" (
+    echo [ERROR] Build completed but no JAR file found
+    cd ..
+    exit /b 1
+)
+
+echo [OK] Backend build completed successfully
 cd ..
 
-REM Build Docker image
-echo Building Docker image...
-cd %DOCKER_DIR%
-docker-compose build backend
-if %errorlevel% neq 0 (
-    echo Docker build failed
-    cd ..
+REM ===== DEPLOYMENT =====
+echo Starting backend server...
+start "Backend" cmd /c "cd %BACKEND_DIR% && ./mvnw.cmd spring-boot:run -Dspring-boot.run.jvmArguments=\"-Xms256m -Xmx512m -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom\" -q"
+timeout /t 3 >nul
+
+REM ===== HEALTH CHECK =====
+echo Waiting for backend...
+set "HEALTH_URL=http://localhost:%BACKEND_PORT%/actuator/health"
+set /a "attempt=0"
+set /a "max_attempts=20"
+
+:health_check
+set /a "attempt+=1"
+if %attempt% gtr %max_attempts% (
+    echo Backend startup failed
     exit /b 1
 )
 
-REM Start backend services
-echo Starting backend services...
-docker-compose up -d backend
-if %errorlevel% neq 0 (
-    echo Backend start failed
-    cd ..
-    exit /b 1
-)
-
-REM Go back to root directory
-cd ..\..
-
-REM Function to check if backend is ready
-set url=http://localhost:%BACKEND_PORT%/actuator/health
-set max_attempts=30
-set attempt=1
-
-echo Waiting for backend to be ready...
-
-:check_loop
-if %attempt% gtr %max_attempts% goto :backend_failed
-
-REM Check if backend health endpoint is accessible
-curl -s --max-time 5 "%url%" >nul 2>&1
+curl -s --max-time 3 "%HEALTH_URL%" >nul 2>&1
 if %errorlevel% equ 0 (
-    echo Backend is ready!
+    echo Backend ready after %attempt% attempts
     goto :start_frontend
 )
 
-echo Attempt %attempt%/%max_attempts%: Backend not ready yet...
-timeout /t 10 /nobreak >nul
-set /a attempt+=1
-goto :check_loop
-
-:backend_failed
-echo Backend failed to start within expected time
-exit /b 1
+echo Health check %attempt%/%max_attempts%...
+timeout /t 3 >nul
+goto :health_check
 
 :start_frontend
-echo Backend is fully started!
 echo Starting frontend...
+start "Backend-Health" "%HEALTH_URL%"
+cd "%FRONTEND_DIR%"
+start "Frontend" cmd /c "npm run dev"
+timeout /t 3 >nul
+start "App" "%FRONTEND_URL%"
 
-REM Open backend in browser
-start http://localhost:%BACKEND_PORT%/actuator/health
-
-REM Start frontend
-cd frontend-client
-call npm run dev
-
-REM Wait a moment for frontend to start, then open in browser
-timeout /t 5 /nobreak >nul
-start http://localhost:%FRONTEND_PORT%
+echo.
+echo ============================================
+echo SUCCESS: %APP_NAME% started successfully!
+echo ============================================
+echo Backend: %HEALTH_URL%
+echo Frontend: %FRONTEND_URL%
+echo.
