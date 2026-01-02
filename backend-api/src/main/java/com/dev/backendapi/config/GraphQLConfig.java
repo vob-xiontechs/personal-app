@@ -10,7 +10,6 @@ import org.springframework.graphql.execution.RuntimeWiringConfigurer;
 
 import com.dev.backendapi.exception.BaseException;
 
-import graphql.schema.DataFetchingEnvironment;
 import reactor.core.publisher.Mono;
 
 @Configuration

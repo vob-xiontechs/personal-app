@@ -31,25 +31,41 @@ if "%ENVIRONMENT%"=="develop" (
     set "BACKEND_PORT=8081"
     set "FRONTEND_PORT=3011"
     set "DOCKER_DIR=docker\develop"
+    set "ENV_DISPLAY=DEVELOP"
+    set "ENV_COLOR=[92m"
 ) else if "%ENVIRONMENT%"=="staging" (
     set "BACKEND_PORT=8082"
     set "FRONTEND_PORT=3012"
     set "DOCKER_DIR=docker\staging"
+    set "ENV_DISPLAY=STAGING"
+    set "ENV_COLOR=[93m"
 ) else (
     set "BACKEND_PORT=8081"
     set "FRONTEND_PORT=3011"
     set "DOCKER_DIR=docker\develop"
+    set "ENV_DISPLAY=UNKNOWN"
+    set "ENV_COLOR=[91m"
 )
+
+REM Display current environment
+echo.
+echo ============================================
+echo ENVIRONMENT: %ENV_DISPLAY%
+echo Backend Port: %BACKEND_PORT%
+echo Frontend Port: %FRONTEND_PORT%
+echo ============================================
+echo.
 
 REM Update frontend config
 echo ENVIRONMENT=%ENVIRONMENT%> "%ENV_FILE%"
 echo VITE_API_BASE_URL=http://localhost:%BACKEND_PORT%>> "%ENV_FILE%"
 
 REM ===== BACKEND BUILD =====
-echo Building backend...
+echo Building backend for %ENV_DISPLAY% environment...
 
 REM Show timeout warning
 echo [INFO] Build timeout: 5 minutes (press Ctrl+C to cancel if needed)
+echo [INFO] Environment: %ENVIRONMENT% / Profile: %ENVIRONMENT%
 cd "%BACKEND_DIR%"
 
 REM Incremental build if JAR exists
@@ -78,10 +94,53 @@ if not exist "target\*.jar" (
 echo [OK] Backend build completed successfully
 cd ..
 
+REM ===== DOCKER CLEANUP =====
+echo Cleaning up existing Docker containers and images...
+cd "%DOCKER_DIR%"
+
+REM Stop and remove containers for this project only
+echo Stopping project containers...
+docker-compose down -v --remove-orphans 2>nul
+
+REM Remove specific containers by name pattern
+echo Removing project containers...
+docker rm -f personal-app-mysql 2>nul
+docker rm -f personal-app-backend-api 2>nul
+docker rm -f personal-app-backend 2>nul
+
+REM Remove specific images for this project
+echo Removing old project images...
+docker rmi personal-app-backend-api 2>nul
+docker rmi personal-app-backend-api:latest 2>nul
+docker rmi mysql:8.0 2>nul
+
+REM Clean up dangling resources (optional, not destructive)
+echo Cleaning up dangling resources...
+docker system prune -f 2>nul
+
+REM Build and start Docker containers
+echo Building and starting Docker containers...
+docker-compose up -d --build
+if errorlevel 1 (
+    echo [ERROR] Failed to start Docker containers
+    cd ..
+    exit /b 1
+)
+echo [OK] Docker containers started successfully
+
+REM Show real-time container logs in a separate window
+echo Starting real-time container log monitoring...
+start "Docker Logs" cmd /c "docker-compose logs -f"
+echo [OK] Docker cleanup completed
+
+cd ..
+
 REM ===== DEPLOYMENT =====
 echo Starting backend server...
-start "Backend" cmd /c "cd %BACKEND_DIR% && ./mvnw.cmd spring-boot:run -Dspring-boot.run.jvmArguments=\"-Xms256m -Xmx512m -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom\" -q"
-timeout /t 3 >nul
+echo [DEBUG] Starting Spring Boot with profile: %ENVIRONMENT%
+start "Backend" cmd /c "cd %BACKEND_DIR% && ./mvnw.cmd spring-boot:run -Dspring.profiles.active=%ENVIRONMENT% -Dspring-boot.run.jvmArguments=\"-Xms256m -Xmx512m -XX:+UseG1GC -Djava.security.egd=file:/dev/./urandom\" -q"
+echo [DEBUG] Backend start command issued, waiting 5 seconds...
+timeout /t 5 >nul
 
 REM ===== HEALTH CHECK =====
 echo Waiting for backend...
@@ -89,29 +148,40 @@ set "HEALTH_URL=http://localhost:%BACKEND_PORT%/actuator/health"
 set /a "attempt=0"
 set /a "max_attempts=20"
 
-:health_check
+:health_check_loop
 set /a "attempt+=1"
 if %attempt% gtr %max_attempts% (
-    echo Backend startup failed
+    echo [ERROR] Backend startup failed after %max_attempts% attempts
+    echo [ERROR] Check backend logs for details
     exit /b 1
 )
 
+echo Health check %attempt%/%max_attempts%...
 curl -s --max-time 3 "%HEALTH_URL%" >nul 2>&1
 if %errorlevel% equ 0 (
-    echo Backend ready after %attempt% attempts
-    goto :start_frontend
+    echo [OK] Backend ready after %attempt% attempts
+    goto start_frontend
 )
 
-echo Health check %attempt%/%max_attempts%...
 timeout /t 3 >nul
-goto :health_check
+goto health_check_loop
 
 :start_frontend
 echo Starting frontend...
 start "Backend-Health" "%HEALTH_URL%"
 cd "%FRONTEND_DIR%"
-start "Frontend" cmd /c "npm run dev"
-timeout /t 3 >nul
+
+REM Check if frontend is already running on the expected port
+netstat -ano | findstr ":%FRONTEND_PORT% " | findstr LISTENING >nul
+if %errorlevel% equ 0 (
+    echo Frontend is already running on port %FRONTEND_PORT%
+) else (
+    echo Starting frontend development server on port %FRONTEND_PORT%
+    start "Frontend" cmd /c "npm run dev"
+    timeout /t 5 >nul
+)
+
+REM Open the application in browser
 start "App" "%FRONTEND_URL%"
 
 echo.

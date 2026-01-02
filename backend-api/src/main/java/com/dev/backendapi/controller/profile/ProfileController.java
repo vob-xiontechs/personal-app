@@ -1,4 +1,4 @@
-package com.dev.backendapi.controller;
+package com.dev.backendapi.controller.profile;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import com.dev.backendapi.controller.dto.ApiResponse;
 import com.dev.backendapi.controller.dto.RegisterUserRequest;
 import com.dev.backendapi.controller.service.ControllerService;
-import com.dev.backendapi.io.ProfileResponse;
+import com.dev.backendapi.io.profile.ProfileResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,7 +41,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Profile Management", description = "APIs for managing user profiles with enhanced validation and security")
-@CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT, RequestMethod.DELETE})
 public class ProfileController {
 
     private final ControllerService controllerService;

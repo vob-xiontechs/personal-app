@@ -1,9 +1,10 @@
 package com.dev.backendapi.controller.service;
 
 import com.dev.backendapi.controller.dto.RegisterUserRequest;
-import com.dev.backendapi.io.ProfileRequest;
-import com.dev.backendapi.io.ProfileResponse;
-import com.dev.backendapi.service.ProfileService;
+import com.dev.backendapi.io.profile.ProfileRequest;
+import com.dev.backendapi.io.profile.ProfileResponse;
+import com.dev.backendapi.service.profile.ProfileService;
+import com.dev.backendapi.service.profile.ProfileValidationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,12 +19,13 @@ import org.springframework.stereotype.Service;
 public class ControllerService {
 
     private final ProfileService profileService;
+    private final ProfileValidationUtil profileValidationUtil;
 
     /**
      * Process user registration with enhanced validation and logging
      */
     public ProfileResponse registerUser(RegisterUserRequest request) {
-        log.info("Processing user registration for email: {}", request.getNormalizedEmail());
+        log.info("Processing user registration for email: {}", profileValidationUtil.normalizeEmail(request.getEmail()));
 
         // Additional business validation
         validateRegistrationRequest(request);
@@ -44,16 +46,16 @@ public class ControllerService {
      */
     private void validateRegistrationRequest(RegisterUserRequest request) {
         // Business rules validation
-        if (!request.isValidEmailDomain()) {
+        if (!profileValidationUtil.isValidEmailDomain(request.getEmail())) {
             throw new IllegalArgumentException("Invalid email domain");
         }
 
-        if (!request.isStrongPassword()) {
+        if (!profileValidationUtil.isStrongPassword(request.getPassword())) {
             throw new IllegalArgumentException("Password does not meet security requirements");
         }
 
         // Additional checks can be added here
-        validateNameFormat(request.getSanitizedName());
+        validateNameFormat(profileValidationUtil.sanitizeName(request.getName()));
     }
 
     /**
@@ -79,8 +81,8 @@ public class ControllerService {
      */
     private ProfileRequest convertToProfileRequest(RegisterUserRequest request) {
         return new ProfileRequest(
-            request.getSanitizedName(),
-            request.getNormalizedEmail(),
+            profileValidationUtil.sanitizeName(request.getName()),
+            profileValidationUtil.normalizeEmail(request.getEmail()),
             request.getPassword() // Note: In production, this should be hashed
         );
     }
@@ -90,8 +92,8 @@ public class ControllerService {
      */
     public RegisterUserRequest sanitizeRequest(RegisterUserRequest request) {
         return RegisterUserRequest.builder()
-                .name(request.getSanitizedName())
-                .email(request.getNormalizedEmail())
+                .name(profileValidationUtil.sanitizeName(request.getName()))
+                .email(profileValidationUtil.normalizeEmail(request.getEmail()))
                 .password(request.getPassword()) // Password should be validated but not modified
                 .build();
     }

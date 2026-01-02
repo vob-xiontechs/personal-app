@@ -8,9 +8,9 @@ import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 import com.dev.backendapi.graphql.dto.UserDto;
-import com.dev.backendapi.io.ProfileRequest;
-import com.dev.backendapi.io.ProfileResponse;
-import com.dev.backendapi.service.ProfileService;
+import com.dev.backendapi.io.profile.ProfileRequest;
+import com.dev.backendapi.io.profile.ProfileResponse;
+import com.dev.backendapi.service.profile.ProfileService;
 
 @Controller
 public class UserController {

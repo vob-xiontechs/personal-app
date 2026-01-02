@@ -1,4 +1,4 @@
-package com.dev.backendapi.io;
+package com.dev.backendapi.io.profile;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

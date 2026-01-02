@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.dev.backendapi.TestDocumentationListener;
-import com.dev.backendapi.io.ProfileRequest;
+import com.dev.backendapi.io.profile.ProfileRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest(properties = {
