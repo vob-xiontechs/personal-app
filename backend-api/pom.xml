@@ -45,10 +45,10 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
         <!-- Security starter for authentication and authorization -->
-        <!-- <dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency> -->
+        </dependency>
         <!-- Validation starter for Bean Validation with Hibernate Validator -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -124,6 +124,28 @@
             <groupId>com.graphql-java</groupId>
             <artifactId>java-dataloader</artifactId>
             <version>${java-dataloader.version}</version>
+        </dependency>
+
+        <!-- JWT (JSON Web Token) -->
+        <!-- JWT API for token creation and validation -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.12.6</version>
+        </dependency>
+        <!-- JWT implementation -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- JWT Jackson integration for JSON processing -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>0.12.6</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Test Dependencies -->

@@ -18,6 +18,18 @@ services:
       db:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ../..
+      dockerfile: ./Dockerfile.frontend
+    container_name: frontend-develop
+    ports:
+      - "3011:3011"
+    environment:
+      - VITE_API_BASE_URL=http://backend:8081
+    depends_on:
+      - backend
+
   db:
     image: mysql:8.1
     container_name: db-develop
