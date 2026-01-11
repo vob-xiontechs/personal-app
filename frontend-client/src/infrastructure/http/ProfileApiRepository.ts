@@ -1,5 +1,6 @@
 import type { ProfileRepository } from "../../domain/profile/repositories/ProfileRepository";
 import type { ProfileRequest } from "../../domain/profile/dto/ProfileRequest";
+import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
 import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 import { env } from "../config/env";
@@ -47,6 +48,24 @@ export class ProfileApiRepository implements ProfileRepository {
         // Success
         return;
       }
+    } catch (error: any) {
+      // Error handling is done in the interceptor
+      throw error;
+    }
+  }
+
+  async getList(): Promise<ProfileResponse[]> {
+    try {
+      const response: AxiosResponse = await this.axiosInstance.get(
+        '/api/v1.0/profiles'
+      );
+
+      if (response.status >= 200 && response.status < 300) {
+        // The response data should contain the list
+        return response.data.data || response.data;
+      }
+
+      throw new Error('Failed to fetch profile list');
     } catch (error: any) {
       // Error handling is done in the interceptor
       throw error;
