@@ -29,20 +29,19 @@ export const ProfileList: React.FC<ProfileListProps> = ({
 
   return (
     <div>
-      <h2>Profile List</h2>
-      <button onClick={onRefresh}>Refresh</button>
+      <button onClick={onRefresh} style={{ marginBottom: '10px' }}>Refresh List</button>
       {profiles.length === 0 ? (
         <p>No profiles found.</p>
       ) : (
-        <ul>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
           {profiles.map((profile) => (
-            <li key={profile.userId}>
+            <li key={profile.userId} style={{ padding: '10px', border: '1px solid #ddd', marginBottom: '5px', borderRadius: '4px' }}>
               <div>
                 <strong>{profile.name}</strong> - {profile.email}
                 {profile.isAccountVerified ? (
-                  <span style={{ color: "green" }}> (Verified)</span>
+                  <span style={{ color: "green", fontWeight: 'bold' }}> ✓ Verified</span>
                 ) : (
-                  <span style={{ color: "red" }}> (Not Verified)</span>
+                  <span style={{ color: "red", fontWeight: 'bold' }}> ✗ Not Verified</span>
                 )}
               </div>
             </li>

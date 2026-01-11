@@ -70,21 +70,29 @@ export const ProfileContainer = () => {
   };
 
   return (
-    <div>
-      <ProfileForm
-        values={values}
-        loading={formLoading}
-        error={formError}
-        onChange={handleChange}
-        onSubmit={handleSubmit}
-      />
-      <hr />
-      <ProfileList
-        profiles={profiles}
-        loading={listLoading}
-        error={listError}
-        onRefresh={loadProfiles}
-      />
+    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
+      <h1>Profile Management</h1>
+
+      <section style={{ marginBottom: '30px' }}>
+        <h2>Create New Profile</h2>
+        <ProfileForm
+          values={values}
+          loading={formLoading}
+          error={formError}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+        />
+      </section>
+
+      <section>
+        <h2>Profile List</h2>
+        <ProfileList
+          profiles={profiles}
+          loading={listLoading}
+          error={listError}
+          onRefresh={loadProfiles}
+        />
+      </section>
     </div>
   );
 };
