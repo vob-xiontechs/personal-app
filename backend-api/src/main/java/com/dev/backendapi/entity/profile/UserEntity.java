@@ -36,7 +36,7 @@ public class UserEntity extends BaseEntity {
     private String verifyOtp;
 
     @Column
-    private Boolean isAccountVerified = false;
+    private Boolean isAccountVerified = true;  // Temporarily set to true for testing
 
     @Column
     private Long verifyOtpExpireAt;
