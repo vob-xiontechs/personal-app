@@ -1,5 +1,30 @@
 package com.dev.backendapi.controller.profile;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.dev.backendapi.controller.dto.ApiResponse;
+import com.dev.backendapi.controller.dto.RegisterUserRequest;
+import com.dev.backendapi.entity.profile.UserEntity;
+import com.dev.backendapi.io.profile.ProfileResponse;
+import com.dev.backendapi.repository.profile.UserRepository;
+import com.dev.backendapi.service.profile.ProfileService;
+import com.dev.backendapi.utils.controller.ControllerUtils;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,28 +32,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.*;
-
-import com.dev.backendapi.controller.dto.ApiResponse;
-import com.dev.backendapi.controller.dto.RegisterUserRequest;
-import com.dev.backendapi.utils.controller.ControllerUtils;
-import com.dev.backendapi.io.profile.ProfileResponse;
-import com.dev.backendapi.service.profile.ProfileService;
-import com.dev.backendapi.repository.profile.UserRepository;
-import com.dev.backendapi.entity.profile.UserEntity;
-import com.dev.backendapi.exception.BusinessException;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 /**
  * Optimized Profile Controller extending generic ControllerService
@@ -301,9 +306,47 @@ public class ProfileController {
             if (userRepository.existsByEmail(sanitizedRequest.getEmail())) {
                 UserEntity existingUser = userRepository.findByEmail(sanitizedRequest.getEmail()).orElse(null);
                 if (existingUser != null && !existingUser.getUserId().equals(userId)) {
-                    throw new BusinessException("EMAIL_EXISTS");
+                    log.warn("[{}] Email already exists for different user: {}", correlationId, sanitizedRequest.getEmail());
+                    return ResponseEntity.status(HttpStatus.CONFLICT)
+                            .body(ApiResponse.error("EMAIL_EXISTS", "Email is already in use by another account"));
                 }
             }
+
+            // Get current user for comparison
+            UserEntity currentUser = userRepository.findByUserId(userId).orElse(null);
+            if (currentUser == null) {
+                log.warn("[{}] User not found for update: {}", correlationId, userId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("PROFILE_NOT_FOUND", "Profile not found"));
+            }
+
+            // Check if any changes were made
+            boolean hasChanges = !sanitizedRequest.getName().equals(currentUser.getName()) ||
+                               !sanitizedRequest.getEmail().equals(currentUser.getEmail()) ||
+                               !sanitizedRequest.getPassword().equals(currentUser.getPassword());
+
+            if (!hasChanges) {
+                log.info("[{}] No changes detected for user: {}", correlationId, userId);
+                return ResponseEntity.ok(ApiResponse.success(
+                    profileService.getProfileDetails(userId),
+                    "No changes were made",
+                    Map.of("correlationId", correlationId, "userId", userId, "changes", false)
+                ));
+            }
+
+            // Log what fields are being updated
+            Map<String, Object> updateDetails = new HashMap<>();
+            if (!sanitizedRequest.getName().equals(currentUser.getName())) {
+                updateDetails.put("name", "changed");
+            }
+            if (!sanitizedRequest.getEmail().equals(currentUser.getEmail())) {
+                updateDetails.put("email", "changed");
+            }
+            if (!sanitizedRequest.getPassword().equals(currentUser.getPassword())) {
+                updateDetails.put("password", "changed");
+            }
+
+            log.info("[{}] Updating profile for user {}: {}", correlationId, userId, updateDetails);
 
             // Process update using ProfileService
             ProfileResponse profileResponse = profileService.updateProfile(userId,
