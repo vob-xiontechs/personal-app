@@ -1,0 +1,473 @@
+/* ==========================================================================
+   Profile Detail Modal - Modern Modal Design
+   ========================================================================== */
+
+.profile-detail-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fade-in 0.3s ease-out;
+}
+
+.profile-detail-modal {
+  background:
+    linear-gradient(145deg, #ffffff 0%, #fafbfc 100%),
+    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.02) 0%, transparent 50%);
+  border-radius: 1rem;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  max-width: 32rem;
+  width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: slide-up 0.3s ease-out;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+
+  /* Scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+
+    &:hover {
+      background: #94a3b8;
+    }
+  }
+}
+
+.profile-detail-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 1;
+
+  &:hover {
+    background: #f1f5f9;
+    color: #334155;
+    transform: scale(1.1);
+  }
+}
+
+/* ==========================================================================
+   Loading State
+   ========================================================================== */
+
+.profile-detail-loading {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--color-text-secondary);
+
+  .loading-spinner {
+    display: inline-block;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 4px solid var(--color-border-secondary);
+    border-top: 4px solid var(--color-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0;
+  }
+}
+
+/* ==========================================================================
+   Error State
+   ========================================================================== */
+
+.profile-detail-error {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: var(--color-error);
+
+  .error-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-error);
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: 1rem;
+    margin: 0 0 2rem 0;
+    color: var(--color-text-secondary);
+  }
+
+  .retry-btn {
+    padding: 0.75rem 2rem;
+    background: var(--color-error);
+    border: none;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: darken(#ef4444, 10%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+  }
+}
+
+/* ==========================================================================
+   Content Layout
+   ========================================================================== */
+
+.profile-detail-content {
+  padding: 2rem;
+
+  .profile-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--color-border-secondary);
+
+    .avatar-large {
+      width: 4rem;
+      height: 4rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-md);
+    }
+
+    .header-info {
+      flex: 1;
+
+      .profile-name {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--color-text-primary);
+        margin: 0 0 0.5rem 0;
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+
+        &.verified {
+          background: rgba(16, 185, 129, 0.1);
+          color: var(--color-success);
+          border: 1px solid rgba(16, 185, 129, 0.2);
+
+          &::before {
+            content: '✓';
+            font-size: 1rem;
+          }
+        }
+
+        &.unverified {
+          background: rgba(239, 68, 68, 0.1);
+          color: var(--color-error);
+          border: 1px solid rgba(239, 68, 68, 0.2);
+
+          &::before {
+            content: '✗';
+            font-size: 1rem;
+          }
+        }
+      }
+    }
+  }
+
+  .profile-detail-body {
+    .detail-section {
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--color-text-primary);
+        margin: 0 0 1.5rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--color-border-secondary);
+      }
+
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+
+        .info-item {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+
+          label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+
+          span {
+            font-size: 1rem;
+            color: var(--color-text-primary);
+            font-weight: 500;
+
+            &.mono-text {
+              font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+              background: var(--color-surface-secondary);
+              padding: 0.25rem 0.5rem;
+              border-radius: 0.25rem;
+              font-size: 0.875rem;
+              border: 1px solid var(--color-border-secondary);
+            }
+
+            &.status-verified {
+              color: var(--color-success);
+              font-weight: 600;
+            }
+
+            &.status-unverified {
+              color: var(--color-error);
+              font-weight: 600;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .profile-detail-actions {
+    margin-top: 2.5rem;
+    text-align: center;
+
+    .btn-secondary {
+      padding: 0.875rem 2rem;
+      background: var(--color-gray-100);
+      border: 2px solid var(--color-border-secondary);
+      border-radius: 0.5rem;
+      color: var(--color-text-primary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: var(--color-gray-200);
+        border-color: var(--color-primary);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+    }
+  }
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .profile-detail-modal {
+    width: 95vw;
+    margin: 1rem;
+  }
+
+  .profile-detail-content {
+    padding: 1.5rem;
+
+    .profile-detail-header {
+      flex-direction: column;
+      text-align: center;
+      gap: 1rem;
+
+      .avatar-large {
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.25rem;
+      }
+
+      .header-info {
+        .profile-name {
+          font-size: 1.5rem;
+        }
+      }
+    }
+
+    .profile-detail-body {
+      .info-grid {
+        gap: 0.75rem;
+
+        .info-item {
+          label {
+            font-size: 0.8125rem;
+          }
+
+          span {
+            font-size: 0.9375rem;
+          }
+        }
+      }
+    }
+
+    .profile-detail-actions {
+      .btn-secondary {
+        width: 100%;
+        max-width: 16rem;
+      }
+    }
+  }
+}
+
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Dark Mode Support
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  .profile-detail-modal {
+    background:
+      linear-gradient(145deg, #1e293b 0%, #0f172a 100%),
+      radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.03) 0%, transparent 50%);
+    border-color: rgba(148, 163, 184, 0.2);
+  }
+
+  .profile-detail-close {
+    color: #94a3b8;
+
+    &:hover {
+      background: #334155;
+      color: #f1f5f9;
+    }
+  }
+
+  .profile-detail-content {
+    .profile-detail-header {
+      border-color: rgba(148, 163, 184, 0.2);
+
+      .header-info {
+        .profile-name {
+          background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+      }
+    }
+
+    .profile-detail-body {
+      .detail-section {
+        h3 {
+          color: #f1f5f9;
+          border-color: rgba(148, 163, 184, 0.2);
+        }
+
+        .info-grid {
+          .info-item {
+            label {
+              color: #94a3b8;
+            }
+
+            span {
+              color: #f1f5f9;
+
+              &.mono-text {
+                background: #334155;
+                border-color: rgba(148, 163, 184, 0.3);
+                color: #e2e8f0;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .profile-detail-actions {
+      .btn-secondary {
+        background: #334155;
+        border-color: rgba(148, 163, 184, 0.3);
+        color: #f1f5f9;
+
+        &:hover {
+          background: #475569;
+          border-color: #3b82f6;
+        }
+      }
+    }
+  }
+}

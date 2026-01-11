@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { ProfileForm } from "./ProfileForm";
 import { ProfileList } from "./ProfileList";
+import { ProfileDetail } from "./ProfileDetail";
 import { ProfilePresenter } from "./ProfilePresenter";
 import { CreateProfileUseCase } from "../../application/profile/CreateProfileUseCase";
 import { GetProfileListUseCase } from "../../application/profile/GetProfileListUseCase";
+import { GetProfileDetailUseCase } from "../../application/profile/GetProfileDetailUseCase";
 import { ProfileApiRepository } from "../../infrastructure/http/ProfileApiRepository";
 import { ProfileDomainService } from "../../domain/profile/services/ProfileDomainService";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
@@ -18,6 +20,7 @@ export const ProfileContainer = () => {
   );
 
   const getListUseCase = new GetProfileListUseCase(repository);
+  const getDetailUseCase = new GetProfileDetailUseCase(repository);
 
   // Form state
   const [values, setValues] = useState(ProfilePresenter.initialState());
@@ -28,6 +31,11 @@ export const ProfileContainer = () => {
   const [profiles, setProfiles] = useState<ProfileResponse[]>([]);
   const [listLoading, setListLoading] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
+
+  // Detail modal state
+  const [selectedProfile, setSelectedProfile] = useState<ProfileResponse | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   // Load profiles on mount
   useEffect(() => {
@@ -67,6 +75,26 @@ export const ProfileContainer = () => {
     } finally {
       setFormLoading(false);
     }
+  };
+
+  const handleProfileClick = async (userId: string) => {
+    setDetailLoading(true);
+    setDetailError(null);
+    setSelectedProfile(null);
+
+    try {
+      const profile = await getDetailUseCase.execute(userId);
+      setSelectedProfile(profile);
+    } catch (e: any) {
+      setDetailError(e.message);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedProfile(null);
+    setDetailError(null);
   };
 
   return (
@@ -112,8 +140,16 @@ export const ProfileContainer = () => {
           loading={listLoading}
           error={listError}
           onRefresh={loadProfiles}
+          onProfileClick={handleProfileClick}
         />
       </section>
+
+      <ProfileDetail
+        profile={selectedProfile}
+        loading={detailLoading}
+        error={detailError}
+        onClose={handleCloseDetail}
+      />
     </div>
   );
 };

@@ -71,4 +71,22 @@ export class ProfileApiRepository implements ProfileRepository {
       throw error;
     }
   }
+
+  async getDetail(userId: string): Promise<ProfileResponse> {
+    try {
+      const response: AxiosResponse = await this.axiosInstance.get(
+        `/api/v1.0/profiles/${userId}`
+      );
+
+      if (response.status >= 200 && response.status < 300) {
+        // The response data should contain the profile details
+        return response.data.data || response.data;
+      }
+
+      throw new Error('Failed to fetch profile details');
+    } catch (error: any) {
+      // Error handling is done in the interceptor
+      throw error;
+    }
+  }
 }

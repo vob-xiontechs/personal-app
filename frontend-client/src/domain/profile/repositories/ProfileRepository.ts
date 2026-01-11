@@ -5,4 +5,5 @@ import type { ProfileResponse } from "../dto/ProfileResponse";
 export interface ProfileRepository {
   create(request: ProfileRequest): Promise<void>;
   getList(): Promise<ProfileResponse[]>;
+  getDetail(userId: string): Promise<ProfileResponse>;
 }

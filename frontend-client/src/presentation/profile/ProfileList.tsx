@@ -7,6 +7,7 @@ interface ProfileListProps {
   loading: boolean;
   error: string | null;
   onRefresh: () => void;
+  onProfileClick: (userId: string) => void;
 }
 
 export const ProfileList: React.FC<ProfileListProps> = ({
@@ -14,6 +15,7 @@ export const ProfileList: React.FC<ProfileListProps> = ({
   loading,
   error,
   onRefresh,
+  onProfileClick,
 }) => {
   // Loading state
   if (loading) {
@@ -53,7 +55,12 @@ export const ProfileList: React.FC<ProfileListProps> = ({
       ) : (
         <ul className="profile-list__items">
           {profiles.map((profile) => (
-            <li key={profile.userId} className="profile-list__item">
+            <li
+              key={profile.userId}
+              className="profile-list__item"
+              onClick={() => onProfileClick(profile.userId)}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="profile-list__item-content">
                 <div className="avatar">
                   {profile.name.charAt(0).toUpperCase()}
