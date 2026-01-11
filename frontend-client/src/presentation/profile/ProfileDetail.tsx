@@ -57,7 +57,7 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
               <div className="header-info">
                 <h2 className="profile-name">{profile.name}</h2>
                 <div className={`status-badge ${profile.isAccountVerified ? 'verified' : 'unverified'}`}>
-                  {profile.isAccountVerified ? '✓ Verified Account' : '✗ Unverified Account'}
+                  {profile.isAccountVerified ? 'Verified Account' : 'Unverified Account'}
                 </div>
               </div>
             </div>

@@ -168,22 +168,10 @@
 
         &.verified {
           color: var(--color-success);
-
-          &::before {
-            content: '✓';
-            font-size: 1rem;
-            margin-right: 0.25rem;
-          }
         }
 
         &.unverified {
           color: var(--color-error);
-
-          &::before {
-            content: '✗';
-            font-size: 1rem;
-            margin-right: 0.25rem;
-          }
         }
       }
     }

@@ -70,7 +70,7 @@ export const ProfileList: React.FC<ProfileListProps> = ({
                   <p className="email">{profile.email}</p>
                 </div>
                 <div className={`status ${profile.isAccountVerified ? 'verified' : 'unverified'}`}>
-                  {profile.isAccountVerified ? 'Verified' : 'Not Verified'}
+                  {profile.isAccountVerified ? 'Verified' : 'Unverified'}
                 </div>
               </div>
             </li>
