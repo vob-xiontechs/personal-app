@@ -33,6 +33,16 @@ public class AuthResponse {
         private Long expiresIn;
         private Long refreshExpiresIn;
         private Boolean success;
+
+        // Explicit getter methods for Lombok compatibility
+        public String getEmail() { return email; }
+        public String getUserId() { return userId; }
+        public String getAccessToken() { return accessToken; }
+        public String getRefreshToken() { return refreshToken; }
+        public String getTokenType() { return tokenType; }
+        public Long getExpiresIn() { return expiresIn; }
+        public Long getRefreshExpiresIn() { return refreshExpiresIn; }
+        public Boolean getSuccess() { return success; }
     }
 
     // ===== LOGIN RESPONSES =====

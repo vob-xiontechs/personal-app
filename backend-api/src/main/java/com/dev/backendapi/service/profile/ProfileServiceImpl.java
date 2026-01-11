@@ -1,5 +1,8 @@
 package com.dev.backendapi.service.profile;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,5 +42,17 @@ public class ProfileServiceImpl implements ProfileService {
 
         // Convert to response
         return profileMapper.toProfileResponse(newProfile);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProfileResponse> getProfileList() {
+        // Get all users from repository
+        List<UserEntity> userEntities = userRepository.findAll();
+
+        // Convert to response objects
+        return userEntities.stream()
+                .map(profileMapper::toProfileResponse)
+                .collect(Collectors.toList());
     }
 }

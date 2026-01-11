@@ -1,10 +1,14 @@
 package com.dev.backendapi.service.profile;
 
-import com.dev.backendapi.io.profile.ProfileResponse;
+import java.util.List;
+
 import com.dev.backendapi.io.profile.ProfileRequest;
+import com.dev.backendapi.io.profile.ProfileResponse;
 
 public interface ProfileService {
 
     ProfileResponse createProfile(ProfileRequest request);
+
+    List<ProfileResponse> getProfileList();
 
 }

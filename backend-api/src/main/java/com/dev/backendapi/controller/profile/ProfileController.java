@@ -18,15 +18,23 @@ import org.springframework.web.bind.annotation.*;
 
 import com.dev.backendapi.controller.dto.ApiResponse;
 import com.dev.backendapi.controller.dto.RegisterUserRequest;
-import com.dev.backendapi.controller.service.ControllerService;
+import com.dev.backendapi.utils.controller.ControllerUtils;
 import com.dev.backendapi.io.profile.ProfileResponse;
+import com.dev.backendapi.service.profile.ProfileService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * Optimized Profile Controller with enhanced structure and robustness
+ * Optimized Profile Controller extending generic ControllerService
+ *
+ * Inherits generic functionality:
+ * - Generic validation framework
+ * - Data sanitization utilities
+ * - Request processing pipeline
+ * - Error handling and logging
  *
  * Features:
  * - Standardized API responses
@@ -43,7 +51,8 @@ import java.util.UUID;
 @Tag(name = "Profile Management", description = "APIs for managing user profiles with enhanced validation and security")
 public class ProfileController {
 
-    private final ControllerService controllerService;
+    private final ControllerUtils controllerUtils;
+    private final ProfileService profileService;
 
     /**
      * Register new user profile with comprehensive validation
@@ -70,51 +79,108 @@ public class ProfileController {
             BindingResult bindingResult,
             HttpServletRequest httpRequest) {
 
-        // Generate correlation ID for request tracking
         String correlationId = UUID.randomUUID().toString();
         String clientIp = getClientIpAddress(httpRequest);
 
-        log.info("[{}] Starting user registration for email: {} from IP: {}",
-                correlationId, request.getEmail(), clientIp);
+        // Enhanced logging with client IP
+        log.info("[{}] User registration attempt from IP: {} for email: {}",
+                correlationId, clientIp, request.getEmail());
+
+        // Use generic logging utility
+        controllerUtils.logOperation("user_registration", correlationId, true);
 
         try {
-            // Handle validation errors
+            // Manual validation for now (can be enhanced with ControllerUtils later)
             if (bindingResult.hasErrors()) {
                 Map<String, Object> validationErrors = extractValidationErrors(bindingResult);
                 log.warn("[{}] Validation failed for registration: {}", correlationId, validationErrors);
-
                 return ResponseEntity.badRequest()
                         .body(ApiResponse.validationError(validationErrors));
             }
 
-            // Sanitize input data
-            RegisterUserRequest sanitizedRequest = controllerService.sanitizeRequest(request);
+            // Sanitize input data using ControllerUtils
+            RegisterUserRequest sanitizedRequest = RegisterUserRequest.builder()
+                    .name(controllerUtils.sanitizeName(request.getName()))
+                    .email(controllerUtils.sanitizeEmail(request.getEmail()))
+                    .password(request.getPassword())
+                    .build();
 
-            // Additional business validation logging
-            log.debug("[{}] Business validation passed for user: {}", correlationId, sanitizedRequest.getEmail());
-
-            // Process registration
-            ProfileResponse profileResponse = controllerService.registerUser(sanitizedRequest);
+            // Process registration using ProfileService directly
+            ProfileResponse profileResponse = profileService.createProfile(
+                new com.dev.backendapi.io.profile.ProfileRequest(
+                    sanitizedRequest.getName(),
+                    sanitizedRequest.getEmail(),
+                    sanitizedRequest.getPassword()
+                )
+            );
 
             // Success response with metadata
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("correlationId", correlationId);
             metadata.put("userId", profileResponse.getUserId());
 
-            log.info("[{}] User registration completed successfully for userId: {}",
-                    correlationId, profileResponse.getUserId());
+            // Log success using generic utility
+            controllerUtils.logOperation("user_registration", profileResponse.getUserId(), true);
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.success(profileResponse, "User registered successfully", metadata));
 
         } catch (IllegalArgumentException e) {
+            // Handle business validation errors
+            controllerUtils.logOperation("user_registration", correlationId, false);
             log.warn("[{}] Business validation failed: {}", correlationId, e.getMessage());
 
             return ResponseEntity.unprocessableEntity()
                     .body(ApiResponse.error("BUSINESS_RULE_VIOLATION", e.getMessage()));
 
         } catch (Exception e) {
+            // Handle system errors with generic error handling
+            controllerUtils.logOperation("user_registration", correlationId, false);
             log.error("[{}] Unexpected error during registration: {}", correlationId, e.getMessage(), e);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
+        }
+    }
+
+    /**
+     * Get list of all user profiles
+     */
+    @GetMapping
+    @Operation(
+        summary = "Get profile list",
+        description = "Retrieves a list of all user profiles with basic information"
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile list retrieved successfully",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
+    })
+    public ResponseEntity<ApiResponse<List<ProfileResponse>>> getProfileList() {
+        String correlationId = UUID.randomUUID().toString();
+
+        // Use generic logging utility
+        controllerUtils.logOperation("profile_list_retrieval", correlationId, true);
+
+        try {
+            // Get profile list from service
+            List<ProfileResponse> profileList = profileService.getProfileList();
+
+            // Log success using generic utility
+            controllerUtils.logOperation("profile_list_retrieval", String.valueOf(profileList.size()), true);
+
+            // Success response with metadata
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("correlationId", correlationId);
+            metadata.put("totalCount", profileList.size());
+
+            return ResponseEntity.ok(ApiResponse.success(profileList, "Profile list retrieved successfully", metadata));
+
+        } catch (Exception e) {
+            // Log failure using generic utility
+            controllerUtils.logOperation("profile_list_retrieval", correlationId, false);
+            log.error("[{}] Unexpected error during profile list retrieval: {}", correlationId, e.getMessage(), e);
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
