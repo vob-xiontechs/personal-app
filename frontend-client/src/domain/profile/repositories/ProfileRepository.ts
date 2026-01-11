@@ -6,4 +6,5 @@ export interface ProfileRepository {
   create(request: ProfileRequest): Promise<void>;
   getList(): Promise<ProfileResponse[]>;
   getDetail(userId: string): Promise<ProfileResponse>;
+  update(userId: string, request: ProfileRequest): Promise<ProfileResponse>;
 }

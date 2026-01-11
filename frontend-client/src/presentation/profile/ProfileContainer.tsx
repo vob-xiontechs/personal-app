@@ -6,6 +6,7 @@ import { ProfilePresenter } from "./ProfilePresenter";
 import { CreateProfileUseCase } from "../../application/profile/CreateProfileUseCase";
 import { GetProfileListUseCase } from "../../application/profile/GetProfileListUseCase";
 import { GetProfileDetailUseCase } from "../../application/profile/GetProfileDetailUseCase";
+import { UpdateProfileUseCase } from "../../application/profile/UpdateProfileUseCase";
 import { ProfileApiRepository } from "../../infrastructure/http/ProfileApiRepository";
 import { ProfileDomainService } from "../../domain/profile/services/ProfileDomainService";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
@@ -21,6 +22,7 @@ export const ProfileContainer = () => {
 
   const getListUseCase = new GetProfileListUseCase(repository);
   const getDetailUseCase = new GetProfileDetailUseCase(repository);
+  const updateProfileUseCase = new UpdateProfileUseCase(repository);
 
   // Form state
   const [values, setValues] = useState(ProfilePresenter.initialState());
@@ -97,6 +99,22 @@ export const ProfileContainer = () => {
     setDetailError(null);
   };
 
+  const handleUpdateProfile = async (userId: string, request: any) => {
+    try {
+      await updateProfileUseCase.execute(userId, request);
+      alert("Profile updated successfully");
+      // Refresh the profile data
+      if (selectedProfile) {
+        const updatedProfile = await getDetailUseCase.execute(userId);
+        setSelectedProfile(updatedProfile);
+      }
+      // Refresh the list to show updated data
+      loadProfiles();
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  };
+
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
       <h1 style={{
@@ -149,6 +167,7 @@ export const ProfileContainer = () => {
         loading={detailLoading}
         error={detailError}
         onClose={handleCloseDetail}
+        onUpdate={handleUpdateProfile}
       />
     </div>
   );

@@ -89,4 +89,23 @@ export class ProfileApiRepository implements ProfileRepository {
       throw error;
     }
   }
+
+  async update(userId: string, request: ProfileRequest): Promise<ProfileResponse> {
+    try {
+      const response: AxiosResponse = await this.axiosInstance.put(
+        `/api/v1.0/profiles/${userId}`,
+        request
+      );
+
+      if (response.status >= 200 && response.status < 300) {
+        // The response data should contain the updated profile
+        return response.data.data || response.data;
+      }
+
+      throw new Error('Failed to update profile');
+    } catch (error: any) {
+      // Error handling is done in the interceptor
+      throw error;
+    }
+  }
 }

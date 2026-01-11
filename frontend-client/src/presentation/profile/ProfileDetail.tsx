@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
+import type { ProfileRequest } from "../../domain/profile/dto/ProfileRequest";
 import "./profile-detail.scss";
 
 interface ProfileDetailProps {
@@ -7,6 +8,7 @@ interface ProfileDetailProps {
   loading: boolean;
   error: string | null;
   onClose: () => void;
+  onUpdate?: (userId: string, request: ProfileRequest) => Promise<void>;
 }
 
 export const ProfileDetail: React.FC<ProfileDetailProps> = ({
@@ -14,8 +16,65 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
   loading,
   error,
   onClose,
+  onUpdate,
 }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState<ProfileRequest>({ name: '', email: '', password: '' });
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateError, setUpdateError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (profile) {
+      setEditForm({
+        name: profile.name,
+        email: profile.email,
+        password: '', // Don't prefill password for security
+      });
+    }
+  }, [profile]);
+
   if (!profile && !loading && !error) return null;
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setUpdateError(null);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setUpdateError(null);
+    if (profile) {
+      setEditForm({
+        name: profile.name,
+        email: profile.email,
+        password: '',
+      });
+    }
+  };
+
+  const handleSave = async () => {
+    if (!profile || !onUpdate) return;
+
+    setUpdateLoading(true);
+    setUpdateError(null);
+
+    try {
+      await onUpdate(profile.userId, editForm);
+      setIsEditing(false);
+      // The parent component will handle refreshing the profile data
+    } catch (error: any) {
+      setUpdateError(error.message);
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditForm(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+  };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -55,7 +114,9 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
                 {profile.name.charAt(0).toUpperCase()}
               </div>
               <div className="header-info">
-                <h2 className="profile-name">{profile.name}</h2>
+                <h2 className="profile-name">
+                  {isEditing ? 'Edit Profile' : profile.name}
+                </h2>
                 <div className={`status-badge ${profile.isAccountVerified ? 'verified' : 'unverified'}`}>
                   {profile.isAccountVerified ? 'Verified Account' : 'Unverified Account'}
                 </div>
@@ -63,35 +124,108 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
             </div>
 
             <div className="profile-detail-body">
-              <div className="detail-section">
-                <h3>Profile Information</h3>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <label>User ID</label>
-                    <span className="mono-text">{profile.userId}</span>
-                  </div>
-                  <div className="info-item">
-                    <label>Full Name</label>
-                    <span>{profile.name}</span>
-                  </div>
-                  <div className="info-item">
-                    <label>Email Address</label>
-                    <span>{profile.email}</span>
-                  </div>
-                  <div className="info-item">
-                    <label>Account Status</label>
-                    <span className={profile.isAccountVerified ? 'status-verified' : 'status-unverified'}>
-                      {profile.isAccountVerified ? 'Verified' : 'Not Verified'}
-                    </span>
+              {isEditing ? (
+                <div className="edit-section">
+                  <h3>Edit Profile Information</h3>
+                  {updateError && (
+                    <div className="error-message">
+                      <div className="error-icon">⚠️</div>
+                      <span>{updateError}</span>
+                    </div>
+                  )}
+                  <div className="edit-form">
+                    <div className="form-group">
+                      <label htmlFor="name">Full Name</label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        value={editForm.name}
+                        onChange={handleInputChange}
+                        placeholder="Enter full name"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="email">Email Address</label>
+                      <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={editForm.email}
+                        onChange={handleInputChange}
+                        placeholder="Enter email address"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="password">New Password (leave empty to keep current)</label>
+                      <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        value={editForm.password}
+                        onChange={handleInputChange}
+                        placeholder="Enter new password"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="detail-section">
+                  <h3>Profile Information</h3>
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <label>User ID</label>
+                      <span className="mono-text">{profile.userId}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Full Name</label>
+                      <span>{profile.name}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Email Address</label>
+                      <span>{profile.email}</span>
+                    </div>
+                    <div className="info-item">
+                      <label>Account Status</label>
+                      <span className={profile.isAccountVerified ? 'status-verified' : 'status-unverified'}>
+                        {profile.isAccountVerified ? 'Verified' : 'Not Verified'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="profile-detail-actions">
-              <button className="btn-secondary" onClick={onClose}>
-                Close
-              </button>
+              {isEditing ? (
+                <>
+                  <button
+                    className="btn-secondary"
+                    onClick={handleCancel}
+                    disabled={updateLoading}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn-primary"
+                    onClick={handleSave}
+                    disabled={updateLoading}
+                  >
+                    {updateLoading ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </>
+              ) : (
+                <>
+                  {onUpdate && (
+                    <button className="btn-primary" onClick={handleEdit}>
+                      Edit Profile
+                    </button>
+                  )}
+                  <button className="btn-secondary" onClick={onClose}>
+                    Close
+                  </button>
+                </>
+              )}
             </div>
           </div>
         )}
