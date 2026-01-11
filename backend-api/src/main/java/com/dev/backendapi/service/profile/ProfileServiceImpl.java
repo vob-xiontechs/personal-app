@@ -55,4 +55,15 @@ public class ProfileServiceImpl implements ProfileService {
                 .map(profileMapper::toProfileResponse)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ProfileResponse getProfileDetails(String userId) {
+        // Find user by userId (business key)
+        UserEntity userEntity = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+
+        // Convert to response object
+        return profileMapper.toProfileResponse(userEntity);
+    }
 }

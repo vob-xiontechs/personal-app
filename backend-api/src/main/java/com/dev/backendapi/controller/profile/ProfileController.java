@@ -188,6 +188,60 @@ public class ProfileController {
     }
 
     /**
+     * Get profile details by user ID
+     */
+    @GetMapping("/{userId}")
+    @Operation(
+        summary = "Get profile details",
+        description = "Retrieves detailed information for a specific user profile"
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile details retrieved successfully",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Profile not found",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
+    })
+    public ResponseEntity<ApiResponse<ProfileResponse>> getProfileDetails(@PathVariable String userId) {
+        String correlationId = UUID.randomUUID().toString();
+
+        // Use generic logging utility
+        controllerUtils.logOperation("profile_detail_retrieval", correlationId, true);
+
+        try {
+            // Get profile details from service
+            ProfileResponse profileDetails = profileService.getProfileDetails(userId);
+
+            // Log success using generic utility
+            controllerUtils.logOperation("profile_detail_retrieval", userId, true);
+
+            // Success response with metadata
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("correlationId", correlationId);
+            metadata.put("userId", userId);
+
+            return ResponseEntity.ok(ApiResponse.success(profileDetails, "Profile details retrieved successfully", metadata));
+
+        } catch (IllegalArgumentException e) {
+            // Handle not found errors
+            controllerUtils.logOperation("profile_detail_retrieval", correlationId, false);
+            log.warn("[{}] Profile not found: {}", correlationId, userId);
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("PROFILE_NOT_FOUND", "Profile not found"));
+
+        } catch (Exception e) {
+            // Handle system errors
+            controllerUtils.logOperation("profile_detail_retrieval", correlationId, false);
+            log.error("[{}] Unexpected error during profile detail retrieval: {}", correlationId, e.getMessage(), e);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
+        }
+    }
+
+    /**
      * Health check endpoint
      */
     @GetMapping("/health")

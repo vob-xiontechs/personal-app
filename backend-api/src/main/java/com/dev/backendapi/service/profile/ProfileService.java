@@ -11,4 +11,6 @@ public interface ProfileService {
 
     List<ProfileResponse> getProfileList();
 
+    ProfileResponse getProfileDetails(String userId);
+
 }
