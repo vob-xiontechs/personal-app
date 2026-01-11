@@ -71,10 +71,32 @@ export const ProfileContainer = () => {
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      <h1>Profile Management</h1>
+      <h1 style={{
+        textAlign: 'center',
+        fontSize: '2.5rem',
+        fontWeight: '700',
+        marginBottom: '2rem',
+        background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text'
+      }}>
+        Profile Management
+      </h1>
 
-      <section style={{ marginBottom: '30px' }}>
-        <h2>Create New Profile</h2>
+      <section style={{ marginBottom: '3rem' }}>
+        <h2 style={{
+          fontSize: '1.75rem',
+          fontWeight: '700',
+          marginBottom: '1.5rem',
+          textAlign: 'center',
+          background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
+          Create New Profile
+        </h2>
         <ProfileForm
           values={values}
           loading={formLoading}
@@ -85,7 +107,6 @@ export const ProfileContainer = () => {
       </section>
 
       <section>
-        <h2>Profile List</h2>
         <ProfileList
           profiles={profiles}
           loading={listLoading}
