@@ -44,4 +44,16 @@ public class ProfileDomainService {
         userEntity.setVerifyOtp(null);
         userEntity.setVerifyOtpExpireAt(0L);
     }
+
+    public UserEntity updateProfile(UserEntity userEntity, ProfileRequest request) {
+        // Update the user entity with new values
+        userEntity.setName(request.getName().trim());
+        userEntity.setEmail(request.getEmail().toLowerCase().trim());
+        userEntity.setPassword(request.getPassword());
+
+        // Note: We don't update verification status during regular profile updates
+        // That should be handled separately through verification process
+
+        return userEntity;
+    }
 }

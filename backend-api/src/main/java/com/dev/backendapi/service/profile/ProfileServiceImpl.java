@@ -66,4 +66,21 @@ public class ProfileServiceImpl implements ProfileService {
         // Convert to response object
         return profileMapper.toProfileResponse(userEntity);
     }
+
+    @Override
+    @Transactional
+    public ProfileResponse updateProfile(String userId, ProfileRequest request) {
+        // Find user by userId (business key)
+        UserEntity userEntity = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+
+        // Update user details
+        UserEntity updatedUser = profileDomainService.updateProfile(userEntity, request);
+
+        // Save to repository
+        updatedUser = userRepository.save(updatedUser);
+
+        // Convert to response
+        return profileMapper.toProfileResponse(updatedUser);
+    }
 }

@@ -21,6 +21,9 @@ import com.dev.backendapi.controller.dto.RegisterUserRequest;
 import com.dev.backendapi.utils.controller.ControllerUtils;
 import com.dev.backendapi.io.profile.ProfileResponse;
 import com.dev.backendapi.service.profile.ProfileService;
+import com.dev.backendapi.repository.profile.UserRepository;
+import com.dev.backendapi.entity.profile.UserEntity;
+import com.dev.backendapi.exception.BusinessException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +56,7 @@ public class ProfileController {
 
     private final ControllerUtils controllerUtils;
     private final ProfileService profileService;
+    private final UserRepository userRepository;
 
     /**
      * Register new user profile with comprehensive validation
@@ -235,6 +239,108 @@ public class ProfileController {
             // Handle system errors
             controllerUtils.logOperation("profile_detail_retrieval", correlationId, false);
             log.error("[{}] Unexpected error during profile detail retrieval: {}", correlationId, e.getMessage(), e);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
+        }
+    }
+
+    /**
+     * Update profile details
+     */
+    @PutMapping("/{userId}")
+    @Operation(
+        summary = "Update profile details",
+        description = "Updates the details of a specific user profile"
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile updated successfully",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid input data or validation failed",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Profile not found",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "409", description = "Email already exists",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
+    })
+    public ResponseEntity<ApiResponse<ProfileResponse>> updateProfile(
+            @PathVariable String userId,
+            @Valid @RequestBody RegisterUserRequest request,
+            BindingResult bindingResult,
+            HttpServletRequest httpRequest) {
+
+        String correlationId = UUID.randomUUID().toString();
+        String clientIp = getClientIpAddress(httpRequest);
+
+        // Enhanced logging with client IP
+        log.info("[{}] Profile update attempt from IP: {} for userId: {}",
+                correlationId, clientIp, userId);
+
+        // Use generic logging utility
+        controllerUtils.logOperation("profile_update", correlationId, true);
+
+        try {
+            // Manual validation for now (can be enhanced with ControllerUtils later)
+            if (bindingResult.hasErrors()) {
+                Map<String, Object> validationErrors = extractValidationErrors(bindingResult);
+                log.warn("[{}] Validation failed for update: {}", correlationId, validationErrors);
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.validationError(validationErrors));
+            }
+
+            // Sanitize input data using ControllerUtils
+            RegisterUserRequest sanitizedRequest = RegisterUserRequest.builder()
+                    .name(controllerUtils.sanitizeName(request.getName()))
+                    .email(controllerUtils.sanitizeEmail(request.getEmail()))
+                    .password(request.getPassword())
+                    .build();
+
+            // Check if email is already taken by another user
+            if (userRepository.existsByEmail(sanitizedRequest.getEmail())) {
+                UserEntity existingUser = userRepository.findByEmail(sanitizedRequest.getEmail()).orElse(null);
+                if (existingUser != null && !existingUser.getUserId().equals(userId)) {
+                    throw new BusinessException("EMAIL_EXISTS");
+                }
+            }
+
+            // Process update using ProfileService
+            ProfileResponse profileResponse = profileService.updateProfile(userId,
+                new com.dev.backendapi.io.profile.ProfileRequest(
+                    sanitizedRequest.getName(),
+                    sanitizedRequest.getEmail(),
+                    sanitizedRequest.getPassword()
+                )
+            );
+
+            // Success response with metadata
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("correlationId", correlationId);
+            metadata.put("userId", userId);
+
+            // Log success using generic utility
+            controllerUtils.logOperation("profile_update", userId, true);
+
+            return ResponseEntity.ok(ApiResponse.success(profileResponse, "Profile updated successfully", metadata));
+
+        } catch (IllegalArgumentException e) {
+            // Handle not found or business validation errors
+            controllerUtils.logOperation("profile_update", correlationId, false);
+            log.warn("[{}] Profile update failed: {}", correlationId, e.getMessage());
+
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("PROFILE_NOT_FOUND", "Profile not found"));
+            }
+
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error("BUSINESS_RULE_VIOLATION", e.getMessage()));
+
+        } catch (Exception e) {
+            // Handle system errors
+            controllerUtils.logOperation("profile_update", correlationId, false);
+            log.error("[{}] Unexpected error during profile update: {}", correlationId, e.getMessage(), e);
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));

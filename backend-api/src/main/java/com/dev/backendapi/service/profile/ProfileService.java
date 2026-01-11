@@ -13,4 +13,6 @@ public interface ProfileService {
 
     ProfileResponse getProfileDetails(String userId);
 
+    ProfileResponse updateProfile(String userId, ProfileRequest request);
+
 }
