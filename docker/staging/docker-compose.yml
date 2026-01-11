@@ -30,6 +30,47 @@ services:
       - "3308:3306"
     volumes:
       - db-staging-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "staging_user", "-pstaging_pass"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 10s
+
+  db-init:
+    image: mysql:8.1
+    container_name: db-init-staging
+    environment:
+      - MYSQL_PWD=staging_pass
+    command: ["/bin/sh", "/scripts/init-database.sh"]
+    volumes:
+      - ./backup:/backup
+      - ./init-database.sh:/scripts/init-database.sh
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+      - init
+
+  db-backup:
+    image: mysql:8.1
+    container_name: db-backup-staging
+    environment:
+      - MYSQL_PWD=staging_pass
+    command: >
+      sh -c "
+        mysqldump -h db -u staging_user staging_db > /backup/backup_staging_$(date +%Y%m%d_%H%M%S).sql &&
+        echo 'Staging environment backup completed successfully'
+      "
+    volumes:
+      - ./backup:/backup
+      - ${PWD}/../../.git:/app/.git
+      - ${PWD}/../../:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+      - backup
 
 volumes:
   db-staging-data:

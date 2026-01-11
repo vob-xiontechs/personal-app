@@ -4,3 +4,6 @@
 
 # Build artifacts
 target/
+
+# Database backups
+docker/*/backup/
