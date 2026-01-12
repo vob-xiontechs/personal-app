@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -411,6 +412,54 @@ public class ProfileController {
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
+        }
+    }
+
+    /**
+     * Delete profile by user ID (hard delete)
+     */
+    @DeleteMapping("/{userId}")
+    @Operation(
+        summary = "Delete profile",
+        description = "Permanently deletes a user profile from the database"
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "Profile deleted successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Profile not found",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
+    })
+    public ResponseEntity<Void> deleteProfile(@PathVariable String userId) {
+        String correlationId = UUID.randomUUID().toString();
+
+        // Use generic logging utility
+        controllerUtils.logOperation("profile_delete", correlationId, true);
+
+        try {
+            // Delete profile using service
+            profileService.deleteProfile(userId);
+
+            // Log success using generic utility
+            controllerUtils.logOperation("profile_delete", userId, true);
+
+            return ResponseEntity.noContent().build();
+
+        } catch (IllegalArgumentException e) {
+            // Handle not found errors
+            controllerUtils.logOperation("profile_delete", correlationId, false);
+            log.warn("[{}] Profile not found for deletion: {}", correlationId, userId);
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(null);
+
+        } catch (Exception e) {
+            // Handle system errors
+            controllerUtils.logOperation("profile_delete", correlationId, false);
+            log.error("[{}] Unexpected error during profile deletion: {}", correlationId, e.getMessage(), e);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
 

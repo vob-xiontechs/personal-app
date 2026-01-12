@@ -15,4 +15,6 @@ public interface ProfileService {
 
     ProfileResponse updateProfile(String userId, ProfileRequest request);
 
+    void deleteProfile(String userId);
+
 }

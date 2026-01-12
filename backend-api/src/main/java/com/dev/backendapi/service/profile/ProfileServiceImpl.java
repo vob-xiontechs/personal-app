@@ -83,4 +83,15 @@ public class ProfileServiceImpl implements ProfileService {
         // Convert to response
         return profileMapper.toProfileResponse(updatedUser);
     }
+
+    @Override
+    @Transactional
+    public void deleteProfile(String userId) {
+        // Find user by userId (business key)
+        UserEntity userEntity = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Profile not found"));
+
+        // Hard delete the user from database
+        userRepository.delete(userEntity);
+    }
 }
