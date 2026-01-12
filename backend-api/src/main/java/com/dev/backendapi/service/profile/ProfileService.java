@@ -17,4 +17,6 @@ public interface ProfileService {
 
     void deleteProfile(String userId);
 
+    com.dev.backendapi.controller.dto.PaginatedResponse<ProfileResponse> getProfileList(int page, int size, String sortBy, String sortDirection);
+
 }

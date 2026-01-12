@@ -1,4 +1,4 @@
-import type { ProfileRepository } from "../../domain/profile/repositories/ProfileRepository";
+import type { ProfileRepository, PaginatedResponse } from "../../domain/profile/repositories/ProfileRepository";
 import type { ProfileRequest } from "../../domain/profile/dto/ProfileRequest";
 import type { UpdateProfileRequest } from "../../domain/profile/dto/UpdateProfileRequest";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
@@ -67,6 +67,32 @@ export class ProfileApiRepository implements ProfileRepository {
       }
 
       throw new Error('Failed to fetch profile list');
+    } catch (error: any) {
+      // Error handling is done in the interceptor
+      throw error;
+    }
+  }
+
+  async getListPaginated(page: number, size: number, sortBy?: string, sortDirection?: string): Promise<PaginatedResponse> {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+      });
+
+      if (sortBy) params.append('sortBy', sortBy);
+      if (sortDirection) params.append('sortDirection', sortDirection);
+
+      const response: AxiosResponse = await this.axiosInstance.get(
+        `/api/v1.0/profiles?${params.toString()}`
+      );
+
+      if (response.status >= 200 && response.status < 300) {
+        // The response data should contain the paginated response
+        return response.data.data || response.data;
+      }
+
+      throw new Error('Failed to fetch paginated profile list');
     } catch (error: any) {
       // Error handling is done in the interceptor
       throw error;

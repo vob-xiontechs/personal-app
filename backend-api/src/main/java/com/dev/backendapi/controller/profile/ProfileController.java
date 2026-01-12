@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backendapi.controller.dto.ApiResponse;
+import com.dev.backendapi.controller.dto.PaginatedResponse;
 import com.dev.backendapi.controller.dto.RegisterUserRequest;
 import com.dev.backendapi.controller.dto.UpdateProfileRequest;
 import com.dev.backendapi.entity.profile.UserEntity;
@@ -34,6 +36,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -155,31 +158,26 @@ public class ProfileController {
     }
 
     /**
-     * Get list of all user profiles
+     * Get list of all user profiles (deprecated - use paginated endpoint)
      */
-    @GetMapping
+    @GetMapping("/all")
     @Operation(
-        summary = "Get profile list",
-        description = "Retrieves a list of all user profiles with basic information"
+        summary = "Get all profiles (deprecated)",
+        description = "Retrieves all user profiles without pagination - use /profiles for paginated results"
     )
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile list retrieved successfully",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error",
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
-    })
-    public ResponseEntity<ApiResponse<List<ProfileResponse>>> getProfileList() {
+    @Deprecated
+    public ResponseEntity<ApiResponse<List<ProfileResponse>>> getAllProfiles() {
         String correlationId = UUID.randomUUID().toString();
 
         // Use generic logging utility
-        controllerUtils.logOperation("profile_list_retrieval", correlationId, true);
+        controllerUtils.logOperation("profile_list_retrieval_all", correlationId, true);
 
         try {
             // Get profile list from service
             List<ProfileResponse> profileList = profileService.getProfileList();
 
             // Log success using generic utility
-            controllerUtils.logOperation("profile_list_retrieval", String.valueOf(profileList.size()), true);
+            controllerUtils.logOperation("profile_list_retrieval_all", String.valueOf(profileList.size()), true);
 
             // Success response with metadata
             Map<String, Object> metadata = new HashMap<>();
@@ -190,8 +188,62 @@ public class ProfileController {
 
         } catch (Exception e) {
             // Log failure using generic utility
-            controllerUtils.logOperation("profile_list_retrieval", correlationId, false);
+            controllerUtils.logOperation("profile_list_retrieval_all", correlationId, false);
             log.error("[{}] Unexpected error during profile list retrieval: {}", correlationId, e.getMessage(), e);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));
+        }
+    }
+
+    /**
+     * Get paginated list of user profiles
+     */
+    @GetMapping
+    @Operation(
+        summary = "Get paginated profile list",
+        description = "Retrieves a paginated list of user profiles with sorting support"
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Profile list retrieved successfully",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid pagination parameters",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
+    })
+    public ResponseEntity<ApiResponse<PaginatedResponse<ProfileResponse>>> getProfileList(
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page must be >= 0") int page,
+            @RequestParam(defaultValue = "5") @Min(value = 1, message = "Size must be >= 1") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection) {
+
+        String correlationId = UUID.randomUUID().toString();
+
+        // Use generic logging utility
+        controllerUtils.logOperation("profile_list_paginated_retrieval", correlationId, true);
+
+        try {
+            // Get paginated profile list from service
+            PaginatedResponse<ProfileResponse> paginatedResponse = profileService.getProfileList(page, size, sortBy, sortDirection);
+
+            // Log success using generic utility
+            controllerUtils.logOperation("profile_list_paginated_retrieval", String.valueOf(paginatedResponse.getTotalElements()), true);
+
+            // Success response with metadata
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("correlationId", correlationId);
+            metadata.put("page", paginatedResponse.getPage());
+            metadata.put("size", paginatedResponse.getSize());
+            metadata.put("totalElements", paginatedResponse.getTotalElements());
+            metadata.put("totalPages", paginatedResponse.getTotalPages());
+
+            return ResponseEntity.ok(ApiResponse.success(paginatedResponse, "Profile list retrieved successfully", metadata));
+
+        } catch (Exception e) {
+            // Log failure using generic utility
+            controllerUtils.logOperation("profile_list_paginated_retrieval", correlationId, false);
+            log.error("[{}] Unexpected error during paginated profile list retrieval: {}", correlationId, e.getMessage(), e);
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("INTERNAL_ERROR", "An unexpected error occurred"));

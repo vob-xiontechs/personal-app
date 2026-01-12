@@ -5,14 +5,17 @@ import { ProfileDetail } from "./ProfileDetail";
 import { ProfilePresenter } from "./ProfilePresenter";
 import { CreateProfileUseCase } from "../../application/profile/CreateProfileUseCase";
 import { GetProfileListUseCase } from "../../application/profile/GetProfileListUseCase";
+import { GetProfileListPaginatedUseCase } from "../../application/profile/GetProfileListPaginatedUseCase";
 import { GetProfileDetailUseCase } from "../../application/profile/GetProfileDetailUseCase";
 import { UpdateProfileUseCase } from "../../application/profile/UpdateProfileUseCase";
 import { DeleteProfileUseCase } from "../../application/profile/DeleteProfileUseCase";
 import { ProfileApiRepository } from "../../infrastructure/http/ProfileApiRepository";
 import { ProfileDomainService } from "../../domain/profile/services/ProfileDomainService";
 import { useNotification } from "../../shared/hooks/NotificationContext";
+import { Pagination } from "../../shared/components/Pagination";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
 import type { UpdateProfileRequest } from "../../domain/profile/dto/UpdateProfileRequest";
+import type { PaginatedResponse } from "../../domain/profile/repositories/ProfileRepository";
 
 export const ProfileContainer = () => {
   const { showNotification } = useNotification();
@@ -26,6 +29,7 @@ export const ProfileContainer = () => {
   );
 
   const getListUseCase = new GetProfileListUseCase(repository);
+  const getListPaginatedUseCase = new GetProfileListPaginatedUseCase(repository);
   const getDetailUseCase = new GetProfileDetailUseCase(repository);
   const updateProfileUseCase = new UpdateProfileUseCase(repository);
   const deleteProfileUseCase = new DeleteProfileUseCase(repository);
@@ -37,6 +41,10 @@ export const ProfileContainer = () => {
 
   // List state
   const [profiles, setProfiles] = useState<ProfileResponse[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [pageSize] = useState(5); // Fixed page size as requested
   const [listLoading, setListLoading] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
 
@@ -45,23 +53,36 @@ export const ProfileContainer = () => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
 
-  // Load profiles on mount
+  // Load profiles on mount and when page changes
   useEffect(() => {
-    loadProfiles();
-  }, []);
+    loadProfiles(currentPage);
+  }, [currentPage]);
 
-  const loadProfiles = async () => {
+  const loadProfiles = async (page: number = 0) => {
     setListLoading(true);
     setListError(null);
 
     try {
-      const profileList = await getListUseCase.execute();
-      setProfiles(profileList);
+      const paginatedResponse: PaginatedResponse = await getListPaginatedUseCase.execute(
+        page,
+        pageSize,
+        "createdAt",
+        "desc"
+      );
+
+      setProfiles(paginatedResponse.content);
+      setTotalPages(paginatedResponse.totalPages);
+      setTotalElements(paginatedResponse.totalElements);
+      setCurrentPage(paginatedResponse.page);
     } catch (e: any) {
       setListError(e.message);
     } finally {
       setListLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,9 +196,18 @@ export const ProfileContainer = () => {
         profiles={profiles}
         loading={listLoading}
         error={listError}
-        onRefresh={loadProfiles}
+        onRefresh={() => loadProfiles(currentPage)}
         onProfileClick={handleProfileClick}
         onDelete={handleDeleteProfile}
+      />
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalElements={totalElements}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+        loading={listLoading}
       />
       </section>
 

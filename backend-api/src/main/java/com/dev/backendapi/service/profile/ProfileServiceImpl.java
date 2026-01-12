@@ -3,9 +3,14 @@ package com.dev.backendapi.service.profile;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.dev.backendapi.controller.dto.PaginatedResponse;
 import com.dev.backendapi.entity.profile.UserEntity;
 import com.dev.backendapi.exception.BusinessException;
 import com.dev.backendapi.io.profile.ProfileRequest;
@@ -93,5 +98,36 @@ public class ProfileServiceImpl implements ProfileService {
 
         // Hard delete the user from database
         userRepository.delete(userEntity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PaginatedResponse<ProfileResponse> getProfileList(int page, int size, String sortBy, String sortDirection) {
+        // Create sorting
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDirection) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+
+        // Create pageable
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // Get paginated results
+        Page<UserEntity> userPage = userRepository.findAll(pageable);
+
+        // Convert to response objects
+        List<ProfileResponse> content = userPage.getContent().stream()
+                .map(profileMapper::toProfileResponse)
+                .collect(Collectors.toList());
+
+        // Build paginated response
+        return PaginatedResponse.<ProfileResponse>builder()
+                .content(content)
+                .page(userPage.getNumber())
+                .size(userPage.getSize())
+                .totalElements(userPage.getTotalElements())
+                .totalPages(userPage.getTotalPages())
+                .first(userPage.isFirst())
+                .last(userPage.isLast())
+                .empty(userPage.isEmpty())
+                .build();
     }
 }
