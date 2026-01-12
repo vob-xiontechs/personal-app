@@ -118,4 +118,22 @@ export class ProfileApiRepository implements ProfileRepository {
       throw error;
     }
   }
+
+  async delete(userId: string): Promise<void> {
+    try {
+      const response: AxiosResponse = await this.axiosInstance.delete(
+        `/api/v1.0/profiles/${userId}`
+      );
+
+      if (response.status >= 200 && response.status < 300) {
+        // Success - no content expected
+        return;
+      }
+
+      throw new Error('Failed to delete profile');
+    } catch (error: any) {
+      // Error handling is done in the interceptor
+      throw error;
+    }
+  }
 }

@@ -7,6 +7,7 @@ import { CreateProfileUseCase } from "../../application/profile/CreateProfileUse
 import { GetProfileListUseCase } from "../../application/profile/GetProfileListUseCase";
 import { GetProfileDetailUseCase } from "../../application/profile/GetProfileDetailUseCase";
 import { UpdateProfileUseCase } from "../../application/profile/UpdateProfileUseCase";
+import { DeleteProfileUseCase } from "../../application/profile/DeleteProfileUseCase";
 import { ProfileApiRepository } from "../../infrastructure/http/ProfileApiRepository";
 import { ProfileDomainService } from "../../domain/profile/services/ProfileDomainService";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
@@ -24,6 +25,7 @@ export const ProfileContainer = () => {
   const getListUseCase = new GetProfileListUseCase(repository);
   const getDetailUseCase = new GetProfileDetailUseCase(repository);
   const updateProfileUseCase = new UpdateProfileUseCase(repository);
+  const deleteProfileUseCase = new DeleteProfileUseCase(repository);
 
   // Form state
   const [values, setValues] = useState(ProfilePresenter.initialState());
@@ -116,6 +118,17 @@ export const ProfileContainer = () => {
     }
   };
 
+  const handleDeleteProfile = async (userId: string) => {
+    try {
+      await deleteProfileUseCase.execute(userId);
+      alert("Profile deleted successfully");
+      // Refresh the list to remove deleted profile
+      loadProfiles();
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  };
+
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
       <h1 style={{
@@ -169,6 +182,7 @@ export const ProfileContainer = () => {
         error={detailError}
         onClose={handleCloseDetail}
         onUpdate={handleUpdateProfile}
+        onDelete={handleDeleteProfile}
       />
     </div>
   );

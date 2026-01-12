@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
 import type { UpdateProfileRequest } from "../../domain/profile/dto/UpdateProfileRequest";
+import { DeleteConfirmation } from "./DeleteConfirmation";
 import "./profile-detail.scss";
 
 interface ProfileDetailProps {
@@ -9,6 +10,7 @@ interface ProfileDetailProps {
   error: string | null;
   onClose: () => void;
   onUpdate?: (userId: string, request: UpdateProfileRequest) => Promise<void>;
+  onDelete?: (userId: string) => Promise<void>;
 }
 
 export const ProfileDetail: React.FC<ProfileDetailProps> = ({
@@ -17,6 +19,7 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
   error,
   onClose,
   onUpdate,
+  onDelete,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState<UpdateProfileRequest>({
@@ -28,6 +31,9 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
   });
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (profile) {
@@ -90,6 +96,30 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
     if (e.target === e.currentTarget) {
       onClose();
     }
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirmation(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!profile || !onDelete) return;
+
+    setDeleteLoading(true);
+    try {
+      await onDelete(profile.userId);
+      setShowDeleteConfirmation(false);
+      onClose(); // Close the detail modal after successful deletion
+    } catch (error: any) {
+      // Error handling is done by the parent component
+      setShowDeleteConfirmation(false);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirmation(false);
   };
 
   return (
@@ -254,6 +284,34 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
                       Edit Profile
                     </button>
                   )}
+                  {onDelete && (
+                    <button
+                      className="btn-danger"
+                      onClick={handleDeleteClick}
+                      style={{
+                        background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
+                        color: 'white',
+                        border: 'none',
+                        padding: '0.875rem 2rem',
+                        borderRadius: '0.5rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #b91c1c 0%, #dc2626 100%)';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)';
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      Delete Profile
+                    </button>
+                  )}
                   <button className="btn-secondary" onClick={onClose}>
                     Close
                   </button>
@@ -262,6 +320,14 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
             </div>
           </div>
         )}
+
+        <DeleteConfirmation
+          profileName={profile?.name || ''}
+          isOpen={showDeleteConfirmation}
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+          loading={deleteLoading}
+        />
       </div>
     </div>
   );

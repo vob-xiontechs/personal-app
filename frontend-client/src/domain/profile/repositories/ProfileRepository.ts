@@ -8,4 +8,5 @@ export interface ProfileRepository {
   getList(): Promise<ProfileResponse[]>;
   getDetail(userId: string): Promise<ProfileResponse>;
   update(userId: string, request: UpdateProfileRequest): Promise<ProfileResponse>;
+  delete(userId: string): Promise<void>;
 }
