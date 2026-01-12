@@ -10,10 +10,13 @@ import { UpdateProfileUseCase } from "../../application/profile/UpdateProfileUse
 import { DeleteProfileUseCase } from "../../application/profile/DeleteProfileUseCase";
 import { ProfileApiRepository } from "../../infrastructure/http/ProfileApiRepository";
 import { ProfileDomainService } from "../../domain/profile/services/ProfileDomainService";
+import { useNotification } from "../../shared/hooks/NotificationContext";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
 import type { UpdateProfileRequest } from "../../domain/profile/dto/UpdateProfileRequest";
 
 export const ProfileContainer = () => {
+  const { showNotification } = useNotification();
+
   // Use only REST API with Axios
   const [repository] = useState(() => new ProfileApiRepository());
 
@@ -71,12 +74,13 @@ export const ProfileContainer = () => {
 
     try {
       await createUseCase.execute(values);
-      alert("Profile created successfully");
+      showNotification("success", "Profile Created", "New profile has been created successfully");
       setValues(ProfilePresenter.initialState());
       // Refresh the list after creating
       loadProfiles();
     } catch (e: any) {
       setFormError(e.message);
+      showNotification("error", "Creation Failed", e.message);
     } finally {
       setFormLoading(false);
     }
@@ -105,7 +109,7 @@ export const ProfileContainer = () => {
   const handleUpdateProfile = async (userId: string, request: UpdateProfileRequest) => {
     try {
       await updateProfileUseCase.execute(userId, request);
-      alert("Profile updated successfully");
+      showNotification("success", "Profile Updated", "Profile information has been updated successfully");
       // Refresh the profile data
       if (selectedProfile) {
         const updatedProfile = await getDetailUseCase.execute(userId);
@@ -121,7 +125,7 @@ export const ProfileContainer = () => {
   const handleDeleteProfile = async (userId: string) => {
     try {
       await deleteProfileUseCase.execute(userId);
-      alert("Profile deleted successfully");
+      showNotification("success", "Profile Deleted", "Profile has been permanently removed");
       // Refresh the list to remove deleted profile
       loadProfiles();
     } catch (error: any) {
