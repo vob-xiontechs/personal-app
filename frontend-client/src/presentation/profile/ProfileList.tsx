@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
+import { DeleteConfirmation } from "./DeleteConfirmation";
 import "./profile-list.scss";
 
 interface ProfileListProps {
@@ -8,6 +9,7 @@ interface ProfileListProps {
   error: string | null;
   onRefresh: () => void;
   onProfileClick: (userId: string) => void;
+  onDelete?: (userId: string) => Promise<void>;
 }
 
 export const ProfileList: React.FC<ProfileListProps> = ({
@@ -16,7 +18,40 @@ export const ProfileList: React.FC<ProfileListProps> = ({
   error,
   onRefresh,
   onProfileClick,
+  onDelete,
 }) => {
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [selectedProfileForDelete, setSelectedProfileForDelete] = useState<ProfileResponse | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const handleDeleteClick = (e: React.MouseEvent, profile: ProfileResponse) => {
+    e.stopPropagation(); // Prevent triggering the profile click
+    setSelectedProfileForDelete(profile);
+    setShowDeleteConfirmation(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedProfileForDelete || !onDelete) return;
+
+    setDeleteLoading(true);
+    try {
+      await onDelete(selectedProfileForDelete.userId);
+      setShowDeleteConfirmation(false);
+      setSelectedProfileForDelete(null);
+    } catch (error: any) {
+      // Error handling is done by the parent component
+      setShowDeleteConfirmation(false);
+      setSelectedProfileForDelete(null);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirmation(false);
+    setSelectedProfileForDelete(null);
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -55,13 +90,12 @@ export const ProfileList: React.FC<ProfileListProps> = ({
       ) : (
         <ul className="profile-list__items">
           {profiles.map((profile) => (
-            <li
-              key={profile.userId}
-              className="profile-list__item"
-              onClick={() => onProfileClick(profile.userId)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div className="profile-list__item-content">
+            <li key={profile.userId} className="profile-list__item">
+              <div
+                className="profile-list__item-content"
+                onClick={() => onProfileClick(profile.userId)}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="avatar">
                   {profile.name.charAt(0).toUpperCase()}
                 </div>
@@ -73,10 +107,29 @@ export const ProfileList: React.FC<ProfileListProps> = ({
                   {profile.isAccountVerified ? 'Verified' : 'Unverified'}
                 </div>
               </div>
+              {onDelete && (
+                <div className="profile-list__item-actions">
+                  <button
+                    className="delete-btn"
+                    onClick={(e) => handleDeleteClick(e, profile)}
+                    title="Delete Profile"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ul>
       )}
+
+      <DeleteConfirmation
+        profileName={selectedProfileForDelete?.name || ''}
+        isOpen={showDeleteConfirmation}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        loading={deleteLoading}
+      />
     </div>
   );
 };

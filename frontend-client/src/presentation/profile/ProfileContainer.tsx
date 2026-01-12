@@ -167,13 +167,14 @@ export const ProfileContainer = () => {
       </section>
 
       <section>
-        <ProfileList
-          profiles={profiles}
-          loading={listLoading}
-          error={listError}
-          onRefresh={loadProfiles}
-          onProfileClick={handleProfileClick}
-        />
+      <ProfileList
+        profiles={profiles}
+        loading={listLoading}
+        error={listError}
+        onRefresh={loadProfiles}
+        onProfileClick={handleProfileClick}
+        onDelete={handleDeleteProfile}
+      />
       </section>
 
       <ProfileDetail
