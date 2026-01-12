@@ -10,6 +10,7 @@ import { UpdateProfileUseCase } from "../../application/profile/UpdateProfileUse
 import { ProfileApiRepository } from "../../infrastructure/http/ProfileApiRepository";
 import { ProfileDomainService } from "../../domain/profile/services/ProfileDomainService";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
+import type { UpdateProfileRequest } from "../../domain/profile/dto/UpdateProfileRequest";
 
 export const ProfileContainer = () => {
   // Use only REST API with Axios
@@ -99,7 +100,7 @@ export const ProfileContainer = () => {
     setDetailError(null);
   };
 
-  const handleUpdateProfile = async (userId: string, request: any) => {
+  const handleUpdateProfile = async (userId: string, request: UpdateProfileRequest) => {
     try {
       await updateProfileUseCase.execute(userId, request);
       alert("Profile updated successfully");

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
-import type { ProfileRequest } from "../../domain/profile/dto/ProfileRequest";
+import type { UpdateProfileRequest } from "../../domain/profile/dto/UpdateProfileRequest";
 import "./profile-detail.scss";
 
 interface ProfileDetailProps {
@@ -8,7 +8,7 @@ interface ProfileDetailProps {
   loading: boolean;
   error: string | null;
   onClose: () => void;
-  onUpdate?: (userId: string, request: ProfileRequest) => Promise<void>;
+  onUpdate?: (userId: string, request: UpdateProfileRequest) => Promise<void>;
 }
 
 export const ProfileDetail: React.FC<ProfileDetailProps> = ({
@@ -19,7 +19,13 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
   onUpdate,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editForm, setEditForm] = useState<ProfileRequest>({ name: '', email: '', password: '' });
+  const [editForm, setEditForm] = useState<UpdateProfileRequest>({
+    name: '',
+    email: '',
+    newPassword: '',
+    confirmPassword: '',
+    currentPassword: ''
+  });
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
 
@@ -28,7 +34,9 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
       setEditForm({
         name: profile.name,
         email: profile.email,
-        password: '', // Don't prefill password for security
+        newPassword: '',
+        confirmPassword: '',
+        currentPassword: '' // Don't prefill for security
       });
     }
   }, [profile]);
@@ -47,7 +55,9 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
       setEditForm({
         name: profile.name,
         email: profile.email,
-        password: '',
+        newPassword: '',
+        confirmPassword: '',
+        currentPassword: '',
       });
     }
   };
@@ -135,6 +145,18 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
                   )}
                   <div className="edit-form">
                     <div className="form-group">
+                      <label htmlFor="currentPassword">Current Password *</label>
+                      <input
+                        type="password"
+                        id="currentPassword"
+                        name="currentPassword"
+                        value={editForm.currentPassword}
+                        onChange={handleInputChange}
+                        placeholder="Enter your current password"
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
                       <label htmlFor="name">Full Name</label>
                       <input
                         type="text"
@@ -157,14 +179,25 @@ export const ProfileDetail: React.FC<ProfileDetailProps> = ({
                       />
                     </div>
                     <div className="form-group">
-                      <label htmlFor="password">New Password (leave empty to keep current)</label>
+                      <label htmlFor="newPassword">New Password (leave empty to keep current)</label>
                       <input
                         type="password"
-                        id="password"
-                        name="password"
-                        value={editForm.password}
+                        id="newPassword"
+                        name="newPassword"
+                        value={editForm.newPassword}
                         onChange={handleInputChange}
                         placeholder="Enter new password"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="confirmPassword">Confirm New Password</label>
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        value={editForm.confirmPassword}
+                        onChange={handleInputChange}
+                        placeholder="Confirm new password"
                       />
                     </div>
                   </div>

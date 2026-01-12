@@ -1,5 +1,6 @@
 import type { ProfileRepository } from "../../domain/profile/repositories/ProfileRepository";
 import type { ProfileRequest } from "../../domain/profile/dto/ProfileRequest";
+import type { UpdateProfileRequest } from "../../domain/profile/dto/UpdateProfileRequest";
 import type { ProfileResponse } from "../../domain/profile/dto/ProfileResponse";
 import axios from 'axios';
 import type { AxiosResponse } from 'axios';
@@ -90,11 +91,20 @@ export class ProfileApiRepository implements ProfileRepository {
     }
   }
 
-  async update(userId: string, request: ProfileRequest): Promise<ProfileResponse> {
+  async update(userId: string, request: UpdateProfileRequest): Promise<ProfileResponse> {
     try {
+      // Map UpdateProfileRequest to the backend expected format
+      const backendRequest = {
+        name: request.name,
+        email: request.email,
+        newPassword: request.newPassword || undefined,
+        confirmPassword: request.confirmPassword || undefined,
+        currentPassword: request.currentPassword
+      };
+
       const response: AxiosResponse = await this.axiosInstance.put(
         `/api/v1.0/profiles/${userId}`,
-        request
+        backendRequest
       );
 
       if (response.status >= 200 && response.status < 300) {

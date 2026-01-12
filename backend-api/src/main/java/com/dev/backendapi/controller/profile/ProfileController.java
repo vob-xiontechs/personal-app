@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.dev.backendapi.controller.dto.ApiResponse;
 import com.dev.backendapi.controller.dto.RegisterUserRequest;
+import com.dev.backendapi.controller.dto.UpdateProfileRequest;
 import com.dev.backendapi.entity.profile.UserEntity;
 import com.dev.backendapi.io.profile.ProfileResponse;
 import com.dev.backendapi.repository.profile.UserRepository;
@@ -272,7 +273,7 @@ public class ProfileController {
     })
     public ResponseEntity<ApiResponse<ProfileResponse>> updateProfile(
             @PathVariable String userId,
-            @Valid @RequestBody RegisterUserRequest request,
+            @Valid @RequestBody UpdateProfileRequest request,
             BindingResult bindingResult,
             HttpServletRequest httpRequest) {
 
@@ -295,11 +296,37 @@ public class ProfileController {
                         .body(ApiResponse.validationError(validationErrors));
             }
 
+            // Get current user for validation
+            UserEntity currentUser = userRepository.findByUserId(userId).orElse(null);
+            if (currentUser == null) {
+                log.warn("[{}] User not found for update: {}", correlationId, userId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.error("PROFILE_NOT_FOUND", "Profile not found"));
+            }
+
+            // Verify current password
+            if (!currentUser.getPassword().equals(request.getCurrentPassword())) {
+                log.warn("[{}] Invalid current password for user: {}", correlationId, userId);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error("INVALID_CURRENT_PASSWORD", "Current password is incorrect"));
+            }
+
+            // Validate password confirmation if password is being changed
+            if (request.getNewPassword() != null && !request.getNewPassword().trim().isEmpty()) {
+                if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+                    log.warn("[{}] Password confirmation mismatch for user: {}", correlationId, userId);
+                    return ResponseEntity.badRequest()
+                            .body(ApiResponse.error("PASSWORD_CONFIRMATION_MISMATCH", "New password and confirmation do not match"));
+                }
+            }
+
             // Sanitize input data using ControllerUtils
-            RegisterUserRequest sanitizedRequest = RegisterUserRequest.builder()
+            UpdateProfileRequest sanitizedRequest = UpdateProfileRequest.builder()
                     .name(controllerUtils.sanitizeName(request.getName()))
                     .email(controllerUtils.sanitizeEmail(request.getEmail()))
-                    .password(request.getPassword())
+                    .newPassword(request.getNewPassword())
+                    .confirmPassword(request.getConfirmPassword())
+                    .currentPassword(request.getCurrentPassword())
                     .build();
 
             // Check if email is already taken by another user
@@ -312,18 +339,15 @@ public class ProfileController {
                 }
             }
 
-            // Get current user for comparison
-            UserEntity currentUser = userRepository.findByUserId(userId).orElse(null);
-            if (currentUser == null) {
-                log.warn("[{}] User not found for update: {}", correlationId, userId);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("PROFILE_NOT_FOUND", "Profile not found"));
-            }
+            // Determine final password (new password if provided, otherwise keep current)
+            String finalPassword = sanitizedRequest.getNewPassword() != null && !sanitizedRequest.getNewPassword().trim().isEmpty()
+                    ? sanitizedRequest.getNewPassword()
+                    : currentUser.getPassword();
 
             // Check if any changes were made
             boolean hasChanges = !sanitizedRequest.getName().equals(currentUser.getName()) ||
                                !sanitizedRequest.getEmail().equals(currentUser.getEmail()) ||
-                               !sanitizedRequest.getPassword().equals(currentUser.getPassword());
+                               !finalPassword.equals(currentUser.getPassword());
 
             if (!hasChanges) {
                 log.info("[{}] No changes detected for user: {}", correlationId, userId);
@@ -342,7 +366,7 @@ public class ProfileController {
             if (!sanitizedRequest.getEmail().equals(currentUser.getEmail())) {
                 updateDetails.put("email", "changed");
             }
-            if (!sanitizedRequest.getPassword().equals(currentUser.getPassword())) {
+            if (!finalPassword.equals(currentUser.getPassword())) {
                 updateDetails.put("password", "changed");
             }
 
@@ -353,7 +377,7 @@ public class ProfileController {
                 new com.dev.backendapi.io.profile.ProfileRequest(
                     sanitizedRequest.getName(),
                     sanitizedRequest.getEmail(),
-                    sanitizedRequest.getPassword()
+                    finalPassword
                 )
             );
 
