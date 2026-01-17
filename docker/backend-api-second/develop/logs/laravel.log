@@ -272,3 +272,58 @@
 [stacktrace]
 #0 {main}
 "} 
+[2026-01-17 22:53:45] develop.ERROR: include(/var/www/html/vendor/jenssegers/mongodb/src/MongoDBServiceProvider.php): Failed to open stream: No such file or directory {"exception":"[object] (ErrorException(code: 0): include(/var/www/html/vendor/jenssegers/mongodb/src/MongoDBServiceProvider.php): Failed to open stream: No such file or directory at /var/www/html/vendor/composer/ClassLoader.php:576)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(258): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError(2, 'include(/var/ww...', '/var/www/html/v...', 576)
+#1 /var/www/html/vendor/composer/ClassLoader.php(576): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->Illuminate\\Foundation\\Bootstrap\\{closure}(2, 'include(/var/ww...', '/var/www/html/v...', 576)
+#2 /var/www/html/vendor/composer/ClassLoader.php(576): include('/var/www/html/v...')
+#3 /var/www/html/vendor/composer/ClassLoader.php(427): Composer\\Autoload\\{closure}('/var/www/html/v...')
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(961): Composer\\Autoload\\ClassLoader->loadClass('MongoDB\\\\Laravel...')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(893): Illuminate\\Foundation\\Application->resolveProvider('MongoDB\\\\Laravel...')
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/ProviderRepository.php(74): Illuminate\\Foundation\\Application->register('MongoDB\\\\Laravel...')
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(871): Illuminate\\Foundation\\ProviderRepository->load(Array)
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/RegisterProviders.php(37): Illuminate\\Foundation\\Application->registerConfiguredProviders()
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(342): Illuminate\\Foundation\\Bootstrap\\RegisterProviders->bootstrap(Object(Illuminate\\Foundation\\Application))
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(186): Illuminate\\Foundation\\Application->bootstrapWith(Array)
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(170): Illuminate\\Foundation\\Http\\Kernel->bootstrap()
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#14 /var/www/html/public/index.php(20): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('/var/www/html/p...')
+#16 {main}
+"} 
+[2026-01-17 22:54:33] develop.ERROR: include(/var/www/html/vendor/jenssegers/mongodb/src/MongoDBServiceProvider.php): Failed to open stream: No such file or directory {"exception":"[object] (ErrorException(code: 0): include(/var/www/html/vendor/jenssegers/mongodb/src/MongoDBServiceProvider.php): Failed to open stream: No such file or directory at /var/www/html/vendor/composer/ClassLoader.php:576)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(258): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->handleError(2, 'include(/var/ww...', '/var/www/html/v...', 576)
+#1 /var/www/html/vendor/composer/ClassLoader.php(576): Illuminate\\Foundation\\Bootstrap\\HandleExceptions->Illuminate\\Foundation\\Bootstrap\\{closure}(2, 'include(/var/ww...', '/var/www/html/v...', 576)
+#2 /var/www/html/vendor/composer/ClassLoader.php(576): include('/var/www/html/v...')
+#3 /var/www/html/vendor/composer/ClassLoader.php(427): Composer\\Autoload\\{closure}('/var/www/html/v...')
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(961): Composer\\Autoload\\ClassLoader->loadClass('MongoDB\\\\Laravel...')
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(893): Illuminate\\Foundation\\Application->resolveProvider('MongoDB\\\\Laravel...')
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/ProviderRepository.php(74): Illuminate\\Foundation\\Application->register('MongoDB\\\\Laravel...')
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(871): Illuminate\\Foundation\\ProviderRepository->load(Array)
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/RegisterProviders.php(37): Illuminate\\Foundation\\Application->registerConfiguredProviders()
+#9 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(342): Illuminate\\Foundation\\Bootstrap\\RegisterProviders->bootstrap(Object(Illuminate\\Foundation\\Application))
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(186): Illuminate\\Foundation\\Application->bootstrapWith(Array)
+#11 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(170): Illuminate\\Foundation\\Http\\Kernel->bootstrap()
+#12 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#13 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#14 /var/www/html/public/index.php(20): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#15 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('/var/www/html/p...')
+#16 {main}
+"} 
+[2026-01-17 22:55:04] develop.ERROR: Class "MongoDB\Laravel\MongoDBServiceProvider" not found {"exception":"[object] (Error(code: 0): Class \"MongoDB\\Laravel\\MongoDBServiceProvider\" not found at /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php:961)
+[stacktrace]
+#0 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(893): Illuminate\\Foundation\\Application->resolveProvider('MongoDB\\\\Laravel...')
+#1 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/ProviderRepository.php(74): Illuminate\\Foundation\\Application->register('MongoDB\\\\Laravel...')
+#2 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(871): Illuminate\\Foundation\\ProviderRepository->load(Array)
+#3 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/RegisterProviders.php(37): Illuminate\\Foundation\\Application->registerConfiguredProviders()
+#4 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(342): Illuminate\\Foundation\\Bootstrap\\RegisterProviders->bootstrap(Object(Illuminate\\Foundation\\Application))
+#5 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(186): Illuminate\\Foundation\\Application->bootstrapWith(Array)
+#6 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(170): Illuminate\\Foundation\\Http\\Kernel->bootstrap()
+#7 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter(Object(Illuminate\\Http\\Request))
+#8 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1220): Illuminate\\Foundation\\Http\\Kernel->handle(Object(Illuminate\\Http\\Request))
+#9 /var/www/html/public/index.php(20): Illuminate\\Foundation\\Application->handleRequest(Object(Illuminate\\Http\\Request))
+#10 /var/www/html/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('/var/www/html/p...')
+#11 {main}
+"} 
