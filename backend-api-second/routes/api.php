@@ -22,7 +22,7 @@ Route::prefix('auth')->group(function () {
 });
 
 // Protected Authentication Routes (Auth Required)
-Route::middleware('auth:api')->prefix('auth')->group(function () {
+Route::middleware('jwt.auth')->prefix('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::get('profile', [AuthController::class, 'profile']);
