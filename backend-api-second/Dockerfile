@@ -23,5 +23,5 @@ RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 8010
 
-# Keep container running for manual composer install
-CMD ["tail", "-f", "/dev/null"]
+# Start Laravel development server
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8010"]
