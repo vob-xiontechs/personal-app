@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 REM ============================================
-REM Personal App - Standardized Startup Script
-REM 4-Step Workflow: Backup -> Clean -> Build -> Restore
+REM Personal App - Optimized Startup Script
+REM Sequential execution with smart fallbacks
 REM ============================================
 
 REM ===== CONFIG =====
@@ -52,57 +52,15 @@ REM Set URLs based on configured ports
 set "HEALTH_URL=http://localhost:!BACKEND_PORT!/actuator/health"
 set "FRONTEND_URL=http://localhost:!FRONTEND_PORT!"
 
-REM ===== STEP 1: BACKUP DB =====
-echo ============================================
-echo STEP 1: BACKUP DB
-echo ============================================
-cd "%DOCKER_DIR%"
-
-REM Check if database container is running
-docker ps --filter "name=db-%ENVIRONMENT%" --filter "status=running" -q >nul 2>&1
-if %errorlevel% equ 0 (
-    echo [INFO] Database container is running, creating backup...
-) else (
-    echo [WARNING] Database container is not running, backup may not contain current data
-)
-
-REM Always attempt backup before any cleanup operations
-echo [INFO] Creating mandatory backup before container cleanup...
-docker-compose --profile backup up db-backup
-if %errorlevel% equ 0 (
-    echo [OK] Pre-cleanup database backup completed successfully
-    REM Verify backup file was created
-    for /f %%i in ('dir /b /o-d backup\backup_%ENVIRONMENT%_*.sql 2^>nul') do (
-        echo [OK] Backup file created: %%i
-        goto :backup_before_cleanup_done
-    )
-    echo [WARNING] Backup command succeeded but no new file found
-) else (
-    echo [ERROR] Pre-cleanup database backup failed with error code %errorlevel%
-    echo [WARNING] Proceeding with cleanup despite backup failure
-)
-:backup_before_cleanup_done
-
-cd ..\..
-echo [OK] Step 1 completed: Database backup created
-
 REM ===== DATABASE BACKUP BEFORE CLEANUP =====
 echo Creating backup before container cleanup operations...
 echo [DEBUG] About to cd to DOCKER_DIR: %DOCKER_DIR%
 cd "%DOCKER_DIR%"
 echo [DEBUG] After cd to DOCKER_DIR, current dir: %CD%
 
-REM Check if database container is running
-docker ps --filter "name=db-%ENVIRONMENT%" --filter "status=running" -q >nul 2>&1
-if %errorlevel% equ 0 (
-    echo [INFO] Database container is running, creating backup...
-) else (
-    echo [WARNING] Database container is not running, backup may not contain current data
-)
-
 REM Always attempt backup before any cleanup operations
 echo [INFO] Creating mandatory backup before container cleanup...
-docker-compose --profile backup up db-backup
+docker-compose --profile backup up db-backup >nul 2>&1
 if %errorlevel% equ 0 (
     echo [OK] Pre-cleanup database backup completed successfully
     REM Verify backup file was created
@@ -206,53 +164,6 @@ if errorlevel 1 (
 )
 echo [OK] Docker containers started successfully
 
-REM ===== DATABASE INITIALIZATION FROM LATEST BACKUP =====
-echo Initializing database from the most recent backup file immediately after container creation...
-cd "%DOCKER_DIR%"
-
-REM Check for existing backup files
-if exist "backup\backup_%ENVIRONMENT%_*.sql" (
-    echo [INFO] Found existing backup files
-    REM Find the most recent backup file (newest first)
-    for /f "delims=" %%i in ('dir /b /o:-d backup\backup_%ENVIRONMENT%_*.sql 2^>nul') do (
-        echo [INFO] Latest backup file: %%i
-        goto :restore_backup
-    )
-) else (
-    echo [WARNING] No backup files found for environment %ENVIRONMENT%
-    echo [INFO] Database will remain empty or with schema only
-    goto :no_backup_found
-)
-
-:restore_backup
-REM Restore from the latest backup
-echo [INFO] Restoring database from latest backup...
-docker-compose --profile init up db-init
-if %errorlevel% equ 0 (
-    echo [OK] Database restoration completed successfully
-) else (
-    echo [ERROR] Database restoration failed with error code %errorlevel%
-    cd ..\..
-    exit /b 1
-)
-
-REM ===== DATABASE BACKUP =====
-echo Creating backup of current database state after initialization...
-docker-compose --profile backup up db-backup
-if %errorlevel% equ 0 (
-    echo [OK] Post-initialization database backup completed successfully
-    REM Verify the most recent backup file exists
-    for /f %%i in ('dir /b /o-d backup\backup_%ENVIRONMENT%_*.sql 2^>nul') do (
-        echo [OK] Latest backup file verified: %%i
-        goto :backup_verified
-    )
-    echo [WARNING] No backup files found, but command succeeded
-    :backup_verified
-) else (
-    echo [ERROR] Post-initialization database backup failed with error code %errorlevel%
-)
-
-:no_backup_found
 REM Show real-time container logs in a separate window
 echo Starting real-time container log monitoring...
 start "Docker Logs" cmd /c "cd /d %CD% && docker-compose logs -f"
@@ -263,26 +174,54 @@ cd ..
 REM Backend is already started in Docker container
 
 REM ===== HEALTH CHECK =====
-echo Waiting for backend to be ready...
-set "HEALTH_URL=http://localhost:!BACKEND_PORT!/actuator/health"
+echo Waiting for backend...
 set /a attempt=0
-set /a max_attempts=30
+set /a max_attempts=20
 
 :health_check_loop
 set /a attempt+=1
 if !attempt! gtr !max_attempts! (
     echo [ERROR] Backend startup failed after !max_attempts! attempts
+    echo [ERROR] Check backend logs for details
     exit /b 1
 )
 
 echo Health check !attempt!/!max_attempts!...
-curl -s --max-time 3 "!HEALTH_URL!" >nul 2>&1
+netstat -ano | findstr /R /C:":!BACKEND_PORT! .*LISTENING" >nul 2>&1
 if !errorlevel! equ 0 (
-    echo [OK] Backend ready
+    echo [OK] Backend ready after %attempt% attempts
+
+    REM ===== DATABASE INITIALIZATION FROM LATEST BACKUP =====
+    echo Initializing database from the most recent backup file...
+    cd "%DOCKER_DIR%"
+    docker-compose --profile init up db-init
+    if %errorlevel% equ 0 (
+        echo [OK] Database initialization from latest backup completed successfully
+    ) else (
+        echo [WARNING] Database initialization failed or no backup found, database may be empty
+    )
+
+    REM ===== DATABASE BACKUP =====
+    echo Creating backup of current database state after initialization...
+    docker-compose --profile backup up db-backup
+    if %errorlevel% equ 0 (
+        echo [OK] Post-initialization database backup completed successfully
+        REM Verify the most recent backup file exists
+        for /f %%i in ('dir /b /o-d backup\backup_%ENVIRONMENT%_*.sql 2^>nul') do (
+            echo [OK] Latest backup file verified: %%i
+            goto :backup_verified
+        )
+        echo [WARNING] No backup files found, but command succeeded
+        :backup_verified
+    ) else (
+        echo [ERROR] Post-initialization database backup failed with error code %errorlevel%
+    )
+
+    cd ..\..
     goto start_frontend
 )
 
-timeout /t 2 >nul
+timeout /t 3 >nul
 goto health_check_loop
 
 :start_frontend
