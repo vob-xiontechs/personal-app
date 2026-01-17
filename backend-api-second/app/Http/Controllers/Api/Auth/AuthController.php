@@ -31,7 +31,7 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'User registered successfully',
                 'data' => [
-                    'user' => new TblUserSdResource($result['user']),
+                    'user' => new UserSdResource($result['user']),
                     'token' => $result['token'],
                     'token_type' => $result['token_type'],
                     'expires_in' => $result['expires_in']
@@ -76,7 +76,7 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Login successful',
                 'data' => [
-                    'user' => new TblUserSdResource($result['user']),
+                    'user' => new UserSdResource($result['user']),
                     'token' => $result['token'],
                     'token_type' => $result['token_type'],
                     'expires_in' => $result['expires_in']

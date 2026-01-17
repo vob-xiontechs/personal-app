@@ -2,7 +2,7 @@
 
 namespace App\Services\Auth;
 
-use App\Models\TblUserSd;
+use App\Models\User;
 use App\Repositories\Auth\UserRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -25,7 +25,7 @@ class AuthService
             // Check if user already exists
             if ($this->userRepository->findByEmail($data['email'])) {
                 throw ValidationException::withMessages([
-                    'email' => ['Email đã được sử dụng.']
+                    'email' => ['Email already exists.']
                 ]);
             }
 
@@ -65,7 +65,7 @@ class AuthService
         try {
             if (!$token = JWTAuth::attempt($credentials)) {
                 throw ValidationException::withMessages([
-                    'email' => ['Email hoặc mật khẩu không đúng.']
+                    'email' => ['Invalid email or password.']
                 ]);
             }
 
@@ -88,7 +88,7 @@ class AuthService
                 'error' => $e->getMessage()
             ]);
             throw ValidationException::withMessages([
-                'email' => ['Đăng nhập thất bại. Vui lòng thử lại.']
+                'email' => ['Login failed. Please try again.']
             ]);
         }
     }
@@ -128,7 +128,7 @@ class AuthService
         } catch (\Exception $e) {
             Log::error('Token refresh failed', ['error' => $e->getMessage()]);
             throw ValidationException::withMessages([
-                'token' => ['Token refresh thất bại.']
+                'token' => ['Token refresh failed.']
             ]);
         }
     }
@@ -136,14 +136,14 @@ class AuthService
     /**
      * Get authenticated user profile
      */
-    public function getProfile(): TblUserSd
+    public function getProfile(): User
     {
         try {
             return JWTAuth::user();
         } catch (\Exception $e) {
             Log::error('Get profile failed', ['error' => $e->getMessage()]);
             throw ValidationException::withMessages([
-                'user' => ['Không thể lấy thông tin người dùng.']
+                'user' => ['Unable to retrieve user profile.']
             ]);
         }
     }

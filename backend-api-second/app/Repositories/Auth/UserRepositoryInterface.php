@@ -2,24 +2,24 @@
 
 namespace App\Repositories\Auth;
 
-use App\Models\TblUserSd;
+use App\Models\User;
 
 interface UserRepositoryInterface
 {
     /**
      * Find user by email
      */
-    public function findByEmail(string $email): ?TblUserSd;
+    public function findByEmail(string $email): ?User;
 
     /**
      * Find user by ID
      */
-    public function findById(string $id): ?TblUserSd;
+    public function findById(string $id): ?User;
 
     /**
      * Create a new user
      */
-    public function create(array $data): TblUserSd;
+    public function create(array $data): User;
 
     /**
      * Update user

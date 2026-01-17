@@ -2,20 +2,20 @@
 
 namespace App\Repositories\Auth;
 
-use App\Models\TblUserSd;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 
 class UserRepository implements UserRepositoryInterface
 {
     public function __construct(
-        private TblUserSd $model
+        private User $model
     ) {}
 
     /**
      * Find user by email
      */
-    public function findByEmail(string $email): ?TblUserSd
+    public function findByEmail(string $email): ?User
     {
         try {
             return $this->model->where('email', $email)->first();
@@ -31,7 +31,7 @@ class UserRepository implements UserRepositoryInterface
     /**
      * Find user by ID
      */
-    public function findById(string $id): ?TblUserSd
+    public function findById(string $id): ?User
     {
         try {
             return $this->model->find($id);
@@ -47,7 +47,7 @@ class UserRepository implements UserRepositoryInterface
     /**
      * Create a new user
      */
-    public function create(array $data): TblUserSd
+    public function create(array $data): User
     {
         try {
             $user = $this->model->create($data);
