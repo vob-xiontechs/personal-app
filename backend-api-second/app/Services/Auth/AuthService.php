@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Log;
 class AuthService
 {
     public function __construct(
-        private UserRepositoryInterface $userRepository
+        private UserRepositoryInterface $userRepository,
+        private JwtService $jwtService
     ) {}
 
     /**
@@ -37,7 +38,7 @@ class AuthService
             ]);
 
             // Generate JWT token
-            $token = JWTAuth::fromUser($user);
+            $token = $this->jwtService->generateToken($user);
 
             Log::info('User registered successfully', ['user_id' => $user->_id, 'email' => $user->email]);
 
