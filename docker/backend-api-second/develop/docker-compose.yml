@@ -31,10 +31,13 @@ services:
     restart: unless-stopped
     ports:
       - "27017:27017"
-
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: mypassword123
     volumes:
       - mongodb_data:/data/db
       - ./backup:/backup
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
     networks:
       - backend-api-second-network
     healthcheck:

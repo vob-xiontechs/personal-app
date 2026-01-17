@@ -7,10 +7,12 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libzip-dev \
+    libssl-dev \
+    pkg-config \
     && docker-php-ext-install zip pdo_mysql
 
-# Install MongoDB extension
-RUN pecl install mongodb && docker-php-ext-enable mongodb
+# Install MongoDB extension with SSL support
+RUN printf "\n" | pecl install mongodb-2.1.4 && docker-php-ext-enable mongodb
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
