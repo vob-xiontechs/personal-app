@@ -135,7 +135,7 @@ return [
     */
 
     'aliases' => [
-        //
+        'JwtFacade' => \App\Services\Auth\Jwt\JwtFacade::class,
     ],
 
 ];

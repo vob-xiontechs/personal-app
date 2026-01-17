@@ -4,17 +4,15 @@ namespace App\Services\Auth;
 
 use App\Models\User;
 use App\Repositories\Auth\UserRepositoryInterface;
+use App\Services\Auth\Jwt\JwtFacade;
 use Illuminate\Support\Facades\Hash;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
 
 class AuthService
 {
     public function __construct(
-        private UserRepositoryInterface $userRepository,
-        private JwtService $jwtService
+        private UserRepositoryInterface $userRepository
     ) {}
 
     /**
@@ -38,7 +36,7 @@ class AuthService
             ]);
 
             // Generate JWT token
-            $token = $this->jwtService->generateToken($user);
+            $token = JwtFacade::generateToken($user);
 
             Log::info('User registered successfully', ['user_id' => $user->_id, 'email' => $user->email]);
 
@@ -64,13 +62,18 @@ class AuthService
     public function login(array $credentials): array
     {
         try {
-            if (!$token = JWTAuth::attempt($credentials)) {
+            // Find user by email
+            $user = $this->userRepository->findByEmail($credentials['email']);
+
+            // Verify user exists and password is correct
+            if (!$user || !Hash::check($credentials['password'], $user->password)) {
                 throw ValidationException::withMessages([
                     'email' => ['Invalid email or password.']
                 ]);
             }
 
-            $user = JWTAuth::user();
+            // Generate JWT token
+            $token = JwtFacade::generateToken($user);
 
             Log::info('User logged in successfully', ['user_id' => $user->_id, 'email' => $user->email]);
 
@@ -100,7 +103,7 @@ class AuthService
     public function logout(): bool
     {
         try {
-            JWTAuth::invalidate(JWTAuth::getToken());
+            JwtFacade::invalidateToken();
             Log::info('User logged out successfully');
             return true;
         } catch (\Exception $e) {
@@ -115,10 +118,9 @@ class AuthService
     public function refresh(): array
     {
         try {
-            $newToken = JWTAuth::refresh();
-            $user = JWTAuth::user();
+            $newToken = JwtFacade::refreshToken();
 
-            Log::info('Token refreshed successfully', ['user_id' => $user->_id]);
+            Log::info('Token refreshed successfully');
 
             return [
                 'token' => $newToken,
@@ -140,7 +142,7 @@ class AuthService
     public function getProfile(): User
     {
         try {
-            return JWTAuth::user();
+            return JwtFacade::getAuthenticatedUser();
         } catch (\Exception $e) {
             Log::error('Get profile failed', ['error' => $e->getMessage()]);
             throw ValidationException::withMessages([
