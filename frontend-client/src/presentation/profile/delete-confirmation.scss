@@ -1,0 +1,313 @@
+/* ==========================================================================
+   Delete Confirmation Modal - Warning Dialog Design
+   ========================================================================== */
+
+.delete-confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: fade-in 0.3s ease-out;
+}
+
+.delete-confirmation-modal {
+  background:
+    linear-gradient(145deg, #ffffff 0%, #fefefe 100%),
+    radial-gradient(circle at 20% 80%, rgba(239, 68, 68, 0.03) 0%, transparent 50%);
+  border-radius: 1rem;
+  box-shadow:
+    0 25px 50px -12px rgba(239, 68, 68, 0.25),
+    0 0 0 1px rgba(239, 68, 68, 0.1) inset;
+  max-width: 28rem;
+  width: 90vw;
+  position: relative;
+  animation: slide-up-scale 0.3s ease-out;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+/* ==========================================================================
+   Header Section
+   ========================================================================== */
+
+.delete-confirmation-header {
+  text-align: center;
+  padding: 2rem 2rem 1.5rem 2rem;
+  border-bottom: 2px solid rgba(239, 68, 68, 0.1);
+
+  .warning-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    animation: bounce-in 0.5s ease-out;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-error);
+    margin: 0;
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* ==========================================================================
+   Body Section
+   ========================================================================== */
+
+.delete-confirmation-body {
+  padding: 1.5rem 2rem;
+
+  .warning-message {
+    font-size: 1.125rem;
+    color: var(--color-text-primary);
+    margin: 0 0 1.5rem 0;
+    line-height: 1.6;
+    text-align: center;
+
+    strong {
+      color: var(--color-error);
+      font-weight: 600;
+    }
+  }
+
+  .warning-details {
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px solid rgba(239, 68, 68, 0.1);
+    border-radius: 0.5rem;
+    padding: 1rem;
+
+    .danger-text {
+      font-size: 0.875rem;
+      color: var(--color-error);
+      font-weight: 600;
+      margin: 0 0 0.5rem 0;
+      text-align: center;
+    }
+
+    .info-text {
+      font-size: 0.875rem;
+      color: var(--color-text-secondary);
+      margin: 0;
+      text-align: center;
+      line-height: 1.4;
+    }
+  }
+}
+
+/* ==========================================================================
+   Actions Section
+   ========================================================================== */
+
+.delete-confirmation-actions {
+  padding: 1.5rem 2rem 2rem 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+
+  button {
+    padding: 0.875rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    min-width: 120px;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+  }
+
+  .btn-cancel {
+    background: var(--color-gray-100);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-secondary);
+
+    &:hover:not(:disabled) {
+      background: var(--color-gray-200);
+      border-color: var(--color-gray-400);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  .btn-delete {
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    color: white;
+    border-color: #dc2626;
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #b91c1c 0%, #dc2626 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  }
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .delete-confirmation-modal {
+    width: 95vw;
+    margin: 1rem;
+  }
+
+  .delete-confirmation-header {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+
+    .warning-icon {
+      font-size: 2.5rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+    }
+  }
+
+  .delete-confirmation-body {
+    padding: 1rem 1.5rem;
+
+    .warning-message {
+      font-size: 1rem;
+    }
+
+    .warning-details {
+      padding: 0.75rem;
+
+      .danger-text,
+      .info-text {
+        font-size: 0.8125rem;
+      }
+    }
+  }
+
+  .delete-confirmation-actions {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    flex-direction: column;
+
+    button {
+      width: 100%;
+      max-width: 16rem;
+      margin: 0 auto;
+    }
+  }
+}
+
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up-scale {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ==========================================================================
+   Dark Mode Support
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+  .delete-confirmation-modal {
+    background:
+      linear-gradient(145deg, #1e293b 0%, #0f172a 100%),
+      radial-gradient(circle at 20% 80%, rgba(239, 68, 68, 0.04) 0%, transparent 50%);
+    border-color: rgba(239, 68, 68, 0.2);
+  }
+
+  .delete-confirmation-header {
+    border-color: rgba(239, 68, 68, 0.2);
+
+    h2 {
+      background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+
+  .delete-confirmation-body {
+    .warning-message {
+      color: #f1f5f9;
+
+      strong {
+        color: #f87171;
+      }
+    }
+
+    .warning-details {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.2);
+
+      .danger-text {
+        color: #fca5a5;
+      }
+
+      .info-text {
+        color: #94a3b8;
+      }
+    }
+  }
+
+  .delete-confirmation-actions {
+    .btn-cancel {
+      background: #334155;
+      border-color: rgba(148, 163, 184, 0.3);
+      color: #f1f5f9;
+
+      &:hover {
+        background: #475569;
+        border-color: #64748b;
+      }
+    }
+  }
+}

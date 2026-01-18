@@ -11,8 +11,8 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 
 import com.dev.backendapi.TestDocumentationListener;
 import com.dev.backendapi.config.GraphQLConfig;
-import com.dev.backendapi.io.ProfileResponse;
-import com.dev.backendapi.service.ProfileService;
+import com.dev.backendapi.io.profile.ProfileResponse;
+import com.dev.backendapi.service.profile.ProfileService;
 
 @GraphQlTest(UserController.class)
 @Import(GraphQLConfig.class)

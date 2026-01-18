@@ -17,9 +17,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.dev.backendapi.io.ProfileRequest;
-import com.dev.backendapi.io.ProfileResponse;
-import com.dev.backendapi.service.ProfileService;
+import com.dev.backendapi.controller.profile.ProfileController;
+import com.dev.backendapi.io.profile.ProfileRequest;
+import com.dev.backendapi.io.profile.ProfileResponse;
+import com.dev.backendapi.service.profile.ProfileService;
 import com.dev.backendapi.TestDocumentationListener;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

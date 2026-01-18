@@ -18,6 +18,18 @@ services:
       db:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ../..
+      dockerfile: ./Dockerfile.frontend
+    container_name: frontend-develop
+    ports:
+      - "3011:3011"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8081
+    depends_on:
+      - backend
+
   db:
     image: mysql:8.1
     container_name: db-develop
@@ -36,6 +48,41 @@ services:
       retries: 10
       interval: 10s
       start_period: 10s
+
+  db-init:
+    image: mysql:8.1
+    container_name: db-init-develop
+    environment:
+      - MYSQL_PWD=develop_pass
+    command: ["/bin/sh", "/scripts/init-database.sh"]
+    volumes:
+      - ./backup:/backup
+      - ./init-database.sh:/scripts/init-database.sh
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+      - init
+
+  db-backup:
+    image: mysql:8.1
+    container_name: db-backup-develop
+    environment:
+      - MYSQL_PWD=develop_pass
+    command: >
+      sh -c "
+        mysqldump -h db -u develop_user develop_db > /backup/backup_develop_$(date +%Y%m%d_%H%M%S).sql &&
+        echo 'Develop environment backup completed successfully'
+      "
+    volumes:
+      - ./backup:/backup
+      - ${PWD}/../../.git:/app/.git
+      - ${PWD}/../../:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+      - backup
 
 volumes:
   db-develop-data:

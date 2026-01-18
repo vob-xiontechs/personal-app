@@ -76,6 +76,50 @@ This system is designed to ensure the Spring Boot backend is fully started befor
 - Security is temporarily disabled in develop environment for easy testing
 - When deploying to production, security needs to be re-enabled and properly configured
 
+## Database Backup
+
+The system includes automated database backup functionality to preserve data before container deletion.
+
+### Automatic Backup During Startup
+
+When you run `start.bat`, the system automatically:
+1. **Checks for running database**: Detects if database containers are currently running
+2. **Creates backup**: If running containers found, automatically backs up the database
+3. **Continues startup**: Proceeds with stopping containers and starting fresh ones
+
+### Manual Backup
+
+You can also run backup manually at any time:
+
+#### Manual Docker Command
+```bash
+# For develop environment
+cd docker/develop
+docker-compose --profile backup up db-backup
+
+# For staging environment
+cd docker/staging
+docker-compose --profile backup up db-backup
+```
+
+### Backup Process
+
+1. **Dump Database**: Uses `mysqldump` to create a SQL file with timestamp
+2. **Save Locally**: Stores backup in `docker/{env}/backup/` directory
+3. **Manual Git Commit**: Backup files are saved locally and can be manually committed to git if needed
+
+### Backup Files
+
+- Location: `docker/develop/backup/` or `docker/staging/backup/`
+- Naming: `backup_YYYYMMDD_HHMMSS.sql`
+- Gitignored: Backup files are excluded from version control (only the directory structure)
+
+### Important Notes
+
+- Run backup **before** stopping containers to ensure latest data is saved
+- Backup service runs independently and doesn't affect running containers
+- If git push fails, backup files are still saved locally
+
 ## Troubleshooting
 
 ### Backend Won't Start
@@ -90,3 +134,8 @@ This system is designed to ensure the Spring Boot backend is fully started befor
 ### MySQL Connection Error
 - Ensure MySQL container is healthy: `docker ps`
 - Verify credentials in `application-develop.yml`
+
+### Backup Issues
+- Ensure database container is running: `docker ps`
+- Check backup logs: `docker logs db-backup-develop`
+- Verify backup directory permissions

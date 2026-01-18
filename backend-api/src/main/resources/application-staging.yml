@@ -7,9 +7,7 @@ spring:
     username: staging_user
     password: staging_pass
   flyway:
-    enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: true
+    enabled: false
   jpa:
     properties:
       hibernate.dialect: org.hibernate.dialect.MySQL8Dialect

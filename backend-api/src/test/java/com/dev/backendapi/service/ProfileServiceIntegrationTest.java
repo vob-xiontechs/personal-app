@@ -8,9 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.dev.backendapi.io.ProfileRequest;
-import com.dev.backendapi.io.ProfileResponse;
-import com.dev.backendapi.repository.UserRepository;
+import com.dev.backendapi.io.profile.ProfileRequest;
+import com.dev.backendapi.io.profile.ProfileResponse;
+import com.dev.backendapi.repository.profile.UserRepository;
+import com.dev.backendapi.service.profile.ProfileService;
 import com.dev.backendapi.TestDocumentationListener;
 
 @SpringBootTest(properties = {

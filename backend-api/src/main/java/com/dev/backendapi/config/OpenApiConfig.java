@@ -1,5 +1,6 @@
 package com.dev.backendapi.config;
 
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,5 +32,14 @@ public class OpenApiConfig {
             .addServersItem(new Server()
                 .url("http://localhost:8082")
                 .description("Staging server"));
+    }
+
+    @Bean
+    public GroupedOpenApi publicApi() {
+        return GroupedOpenApi.builder()
+            .group("public-api")
+            .packagesToScan("com.dev.backendapi.controller", "com.dev.backendapi.io")
+            .packagesToExclude("com.dev.backendapi.service")
+            .build();
     }
 }

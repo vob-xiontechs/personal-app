@@ -2,6 +2,8 @@ package com.dev.backendapi.graphql.dto;
 
 import java.time.LocalDateTime;
 
+import com.dev.backendapi.io.profile.ProfileResponse;
+
 public record UserDto(
     String id,
     String userId,
@@ -11,7 +13,7 @@ public record UserDto(
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {
-    public static UserDto fromProfileResponse(com.dev.backendapi.io.ProfileResponse profile) {
+    public static UserDto fromProfileResponse(ProfileResponse profile) {
         return new UserDto(
             profile.getUserId(), // Use userId as id for GraphQL
             profile.getUserId(),

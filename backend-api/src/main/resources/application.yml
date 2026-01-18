@@ -8,10 +8,15 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate.jdbc.time_zone: Asia/Ho_Chi_Minh
   web:
     resources:
       # Handle static resources gracefully
       static-locations: classpath:/static/,classpath:/public/,classpath:/resources/,classpath:/META-INF/resources/
+      # Disable favicon to prevent NoResourceFoundException
+      favicon:
+        enabled: false
       # Add cache control for static resources
       cache:
         cachecontrol:
@@ -19,6 +24,30 @@ spring:
 
 # Application Configuration
 # Welcome page is now rendered using Thymeleaf HTML template
+
+# JWT Configuration
+jwt:
+  secret:
+    key: ${JWT_SECRET_KEY:mySuperSecretJwtKeyForTokenGenerationAndValidation12345678901234567890}
+  issuer: ${JWT_ISSUER:ba}
+  audience: ${JWT_AUDIENCE:fc}
+  expiration:
+    time: ${JWT_EXPIRATION_TIME:86400000}  # 24 hours in milliseconds
+  refresh:
+    expiration:
+      time: ${JWT_REFRESH_EXPIRATION_TIME:604800000}  # 7 days in milliseconds
+  auto:
+    refresh:
+      threshold: ${JWT_AUTO_REFRESH_THRESHOLD:3600000}  # 1 hour before expiration
+  security:
+    max:
+      tokens:
+        per:
+          user: ${JWT_MAX_TOKENS_PER_USER:5}
+    rate:
+      limit:
+        requests: ${JWT_RATE_LIMIT_REQUESTS:10}
+        window: ${JWT_RATE_LIMIT_WINDOW:60000}  # 1 minute
 
 # Error Messages Configuration by Layer
 app:

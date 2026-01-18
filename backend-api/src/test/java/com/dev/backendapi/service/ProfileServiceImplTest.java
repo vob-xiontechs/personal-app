@@ -15,10 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.dev.backendapi.entity.UserEntity;
-import com.dev.backendapi.io.ProfileRequest;
-import com.dev.backendapi.io.ProfileResponse;
-import com.dev.backendapi.repository.UserRepository;
+import com.dev.backendapi.entity.profile.UserEntity;
+import com.dev.backendapi.io.profile.ProfileRequest;
+import com.dev.backendapi.io.profile.ProfileResponse;
+import com.dev.backendapi.repository.profile.UserRepository;
+import com.dev.backendapi.service.profile.ProfileServiceImpl;
 import com.dev.backendapi.TestDocumentationListener;
 
 @ExtendWith(MockitoExtension.class)

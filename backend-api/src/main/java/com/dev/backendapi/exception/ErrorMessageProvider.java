@@ -46,6 +46,8 @@ public class ErrorMessageProvider {
         controllerMessages.put("UNSUPPORTED_CONTENT_TYPE", "Unsupported content type");
         ERROR_MESSAGES.put("CONTROLLER", controllerMessages);
 
+        // Authentication messages are now handled by AuthConstants
+
         // Initialize VALIDATION layer messages
         Map<String, String> validationMessages = new HashMap<>();
         validationMessages.put("VALIDATION_ERROR", "Input validation error");

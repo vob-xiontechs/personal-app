@@ -12,7 +12,7 @@ import org.springframework.graphql.test.tester.GraphQlTester;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.dev.backendapi.TestDocumentationListener;
-import com.dev.backendapi.service.ProfileService;
+import com.dev.backendapi.service.profile.ProfileService;
 
 @GraphQlTest(UserController.class)
 class UserGraphQLIntegrationTest {
