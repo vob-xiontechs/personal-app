@@ -2,8 +2,8 @@
 setlocal enabledelayedexpansion
 
 REM ============================================
-REM Personal App - Optimized Startup Script
-REM Sequential execution with smart fallbacks
+REM Personal App - Update Script (No Cleanup)
+REM Updates containers without deleting images/containers/volumes
 REM ============================================
 
 REM ===== CONFIG =====
@@ -14,7 +14,7 @@ set "BACKEND_DIR=backend-api"
 set "FRONTEND_DIR=frontend-client"
 
 REM ===== INIT =====
-echo Starting %APP_NAME%...
+echo Starting %APP_NAME% update...
 
 REM Read environment first
 for /f "tokens=1,2 delims==" %%a in (%ENV_FILE%) do (
@@ -52,28 +52,55 @@ REM Set URLs based on configured ports
 set "HEALTH_URL=http://localhost:!BACKEND_PORT!/actuator/health"
 set "FRONTEND_URL=http://localhost:!FRONTEND_PORT!"
 
-REM ===== DATABASE BACKUP BEFORE CLEANUP =====
-echo Creating backup before container cleanup operations...
+REM ===== DATABASE BACKUP =====
+echo Creating backup before update...
 echo [DEBUG] About to cd to DOCKER_DIR: %DOCKER_DIR%
 cd "%DOCKER_DIR%"
 echo [DEBUG] After cd to DOCKER_DIR, current dir: %CD%
 
-REM Always attempt backup before any cleanup operations
-echo [INFO] Creating mandatory backup before container cleanup...
+REM Always create backup before updates
+echo [INFO] Creating backup before update operations...
 docker-compose --profile backup up db-backup >nul 2>&1
 if %errorlevel% equ 0 (
-    echo [OK] Pre-cleanup database backup completed successfully
+    echo [OK] Database backup completed successfully before update
     REM Verify backup file was created
     for /f %%i in ('dir /b /o-d backup\backup_%ENVIRONMENT%_*.sql 2^>nul') do (
-        echo [OK] Backup file created: %%i
-        goto :backup_before_cleanup_done
+        echo [OK] Database backup file created: %%i
+        goto :db_backup_done
     )
-    echo [WARNING] Backup command succeeded but no new file found
+    echo [WARNING] Database backup command succeeded but no new file found
 ) else (
-    echo [ERROR] Pre-cleanup database backup failed with error code %errorlevel%
-    echo [WARNING] Proceeding with cleanup despite backup failure
+    echo [ERROR] Database backup failed before update
 )
-:backup_before_cleanup_done
+
+:db_backup_done
+REM Backup environment files
+echo [INFO] Creating environment files backup...
+set "TIMESTAMP=%date:~-4%%date:~3,2%%date:~0,2%_%time:~0,2%%time:~3,2%%time:~6,2%"
+set "TIMESTAMP=%TIMESTAMP: =0%"
+
+if not exist "backup\env" mkdir "backup\env"
+
+REM Backup main frontend .env
+if exist "..\..\..\frontend-client\.env" (
+    copy "..\..\..\frontend-client\.env" "backup\env\.env_frontend_%ENVIRONMENT%_%TIMESTAMP%" >nul
+    echo [OK] Frontend .env backed up
+)
+
+REM Backup backend .env if exists
+if exist "..\..\..\backend-api\.env" (
+    copy "..\..\..\backend-api\.env" "backup\env\.env_backend_%ENVIRONMENT%_%TIMESTAMP%" >nul
+    echo [OK] Backend .env backed up
+)
+
+REM Backup second backend .env
+if exist "..\..\..\backend-api-second\.env" (
+    copy "..\..\..\backend-api-second\.env" "backup\env\.env_backend_second_%ENVIRONMENT%_%TIMESTAMP%" >nul
+    echo [OK] Second backend .env backed up
+)
+
+echo [OK] Environment files backup completed
+:backup_done
 
 echo [DEBUG] About to cd back to project root
 cd ..\..\..
@@ -83,6 +110,7 @@ REM Display current environment
 echo.
 echo ============================================
 echo ENVIRONMENT: %ENV_DISPLAY%
+echo OPERATION: UPDATE (No Cleanup)
 echo Database Port: %DB_PORT%
 echo Backend Port: %BACKEND_PORT%
 echo Frontend Port: %FRONTEND_PORT%
@@ -130,79 +158,71 @@ if not exist "target\*.jar" (
 echo [OK] Backend build completed successfully
 cd ..
 
-REM ===== DOCKER CLEANUP =====
-echo Cleaning up existing Docker containers, images, and volumes...
+REM ===== DOCKER UPDATE =====
+echo Checking Docker containers status...
 cd "%DOCKER_DIR%"
 
-REM Stop and remove containers for this project only
-echo Stopping project containers...
-docker-compose down -v --remove-orphans 2>nul
+REM Check which containers are running
+echo Checking main backend container...
+docker ps --filter "name=backend-api-%ENVIRONMENT%" --filter "status=running" -q >nul 2>&1
+if !errorlevel! equ 0 (
+    echo [OK] Main backend container is running
+) else (
+    echo [INFO] Main backend container not found, will rebuild...
+    set "REBUILD_MAIN=1"
+)
 
-REM Remove specific containers by name pattern
-echo Removing project containers...
-docker rm -f personal-app-mysql 2>nul
-docker rm -f personal-app-backend-api 2>nul
-docker rm -f personal-app-backend 2>nul
+REM Check database container
+echo Checking database container...
+docker ps --filter "name=mysql-%ENVIRONMENT%" --filter "status=running" -q >nul 2>&1
+if !errorlevel! equ 0 (
+    echo [OK] Database container is running
+) else (
+    echo [INFO] Database container not found, will rebuild...
+    set "REBUILD_DB=1"
+)
 
-REM Remove specific images for this project
-echo Removing old project images...
-docker rmi personal-app-backend-api 2>nul
-docker rmi personal-app-backend-api:latest 2>nul
-docker rmi mysql:8.0 2>nul
+REM Update containers selectively
+if defined REBUILD_MAIN (
+    if defined REBUILD_DB (
+        echo Building and updating all Docker containers...
+        docker-compose up -d --build
+    ) else (
+        echo Building and updating main backend container only...
+        docker-compose up -d --build backend-api
+    )
+) else if defined REBUILD_DB (
+    echo Building and updating database container only...
+    docker-compose up -d --build mysql
+) else (
+    echo Starting existing containers without rebuild...
+    docker-compose up -d
+)
 
-REM Clean up dangling resources (optional, not destructive)
-echo Cleaning up dangling resources...
-docker system prune -f 2>nul
-
-echo [OK] Docker cleanup completed
-cd ..\..\..
-
-echo [DEBUG] Current directory after Docker cleanup: %CD%
-
-REM ===== BACKEND-API-SECOND BUILD =====
-echo Backend-api-second will be built inside Docker container (no local build needed)
-
-REM ===== DOCKER BUILD & START =====
-echo Building and starting main Docker containers...
-cd "%DOCKER_DIR%"
-
-REM Build and start all Docker containers synchronously
-docker-compose up -d --build
 if errorlevel 1 (
-    echo [ERROR] Failed to start main Docker containers
+    echo [ERROR] Failed to update Docker containers
     cd ..
     exit /b 1
 )
-echo [OK] Main Docker containers started successfully
+echo [OK] Docker containers updated successfully
 
-REM Show real-time container logs in a separate window
-echo Starting real-time container log monitoring...
-start "Docker Logs" cmd /c "cd /d %CD% && docker-compose logs -f"
-echo [OK] Main Docker build and start completed
+REM Backend is already started in Docker container
 
-cd ..\..\..
-
-REM ===== BACKEND-API-SECOND DOCKER BUILD & START =====
-echo Building and starting backend-api-second Docker containers...
-cd "docker\backend-api-second\develop"
-
-REM Build and start backend-api-second containers (PHP + MongoDB)
+REM ===== START SECOND BACKEND (LARAVEL + MONGODB) =====
+echo Starting second backend (Laravel + MongoDB)...
+cd ..\backend-api-second\develop
 docker-compose up -d --build
-if errorlevel 1 (
-    echo [ERROR] Failed to start backend-api-second Docker containers
+if %errorlevel% equ 0 (
+    echo [OK] Second backend containers updated successfully
+) else (
+    echo [ERROR] Failed to update second backend containers
     cd ..\..\..
     exit /b 1
 )
-echo [OK] Backend-api-second Docker containers started successfully
 
-REM Show backend-api-second logs
-echo Starting backend-api-second container log monitoring...
-start "Backend-API-Second Logs" cmd /c "cd /d %CD% && docker-compose logs -f"
-echo [OK] Backend-api-second Docker build and start completed
-
+REM Second backend started (no health check wait)
+echo [OK] Second backend update initiated
 cd ..\..\..
-
-REM Backend is already started in Docker container
 
 REM ===== HEALTH CHECK =====
 echo Waiting for backend...
@@ -212,7 +232,7 @@ set /a max_attempts=20
 :health_check_loop
 set /a attempt+=1
 if !attempt! gtr !max_attempts! (
-    echo [ERROR] Backend startup failed after !max_attempts! attempts
+    echo [ERROR] Backend update failed after !max_attempts! attempts
     echo [ERROR] Check backend logs for details
     exit /b 1
 )
@@ -221,38 +241,9 @@ echo Health check !attempt!/!max_attempts!...
 netstat -ano | findstr /R /C:":!BACKEND_PORT! .*LISTENING" >nul 2>&1
 if !errorlevel! equ 0 (
     echo [OK] Backend ready after %attempt% attempts
-
-    REM ===== DATABASE INITIALIZATION FROM LATEST BACKUP =====
-    echo Initializing database from the most recent backup file...
-    cd "%DOCKER_DIR%"
-    docker-compose --profile init up db-init
-    if %errorlevel% equ 0 (
-        echo [OK] Database initialization from latest backup completed successfully
-    ) else (
-        echo [WARNING] Database initialization failed or no backup found, database may be empty
-    )
-
-    REM ===== DATABASE BACKUP =====
-    echo Creating backup of current database state after initialization...
-    docker-compose --profile backup up db-backup
-    if %errorlevel% equ 0 (
-        echo [OK] Post-initialization database backup completed successfully
-        REM Verify the most recent backup file exists
-        for /f %%i in ('dir /b /o-d backup\backup_%ENVIRONMENT%_*.sql 2^>nul') do (
-            echo [OK] Latest backup file verified: %%i
-            goto :backup_verified
-        )
-        echo [WARNING] No backup files found, but command succeeded
-        :backup_verified
-    ) else (
-        echo [ERROR] Post-initialization database backup failed with error code %errorlevel%
-    )
-
-    cd ..\..\..
     goto start_frontend
 )
 
-timeout /t 3 >nul
 goto health_check_loop
 
 :start_frontend
@@ -283,7 +274,7 @@ start "App" "!FRONTEND_URL!"
 
 echo.
 echo ============================================
-echo SUCCESS: %APP_NAME% started successfully!
+echo SUCCESS: %APP_NAME% updated successfully!
 echo ============================================
 echo Backend: !HEALTH_URL!
 echo Frontend: !FRONTEND_URL!

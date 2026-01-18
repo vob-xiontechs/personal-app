@@ -3,7 +3,7 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ../../backend-api
+      context: ../../../backend-api
     container_name: backend-staging
     environment:
       - SPRING_PROFILES_ACTIVE=staging

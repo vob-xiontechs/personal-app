@@ -20,15 +20,15 @@ if "%ENVIRONMENT%"=="" set "ENVIRONMENT=%DEFAULT_ENV%"
 
 REM Configure environment
 if "%ENVIRONMENT%"=="develop" (
-    set "DOCKER_DIR=docker\develop"
+    set "DOCKER_DIR=docker\backend-api"
     set "BACKEND_PORT=8081"
     set "ENV_DISPLAY=DEVELOP"
 ) else if "%ENVIRONMENT%"=="staging" (
-    set "DOCKER_DIR=docker\staging"
+    set "DOCKER_DIR=docker\backend-api\staging"
     set "BACKEND_PORT=8082"
     set "ENV_DISPLAY=STAGING"
 ) else (
-    set "DOCKER_DIR=docker\develop"
+    set "DOCKER_DIR=docker\backend-api"
     set "BACKEND_PORT=8081"
     set "ENV_DISPLAY=UNKNOWN"
 )

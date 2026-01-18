@@ -1,14 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\WelcomeController;
 
-Route::get('/', function () {
-    return 'Hello World';
-});
+Route::get('/', [WelcomeController::class, 'index']);
 
-Route::get('/docs', function () {
-    return view('swagger-ui');
-});
+Route::get('/docs', [WelcomeController::class, 'docs'])->name('docs');
 
 Route::get('/api-docs.yaml', function () {
     $yamlContent = file_get_contents(storage_path('api-docs/api-docs-develop.yaml'));
