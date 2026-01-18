@@ -88,11 +88,7 @@ class AuthController extends Controller
         try {
             $result = AuthService::login($request->only(['email', 'password']));
 
-            return response()->json([
-                'success' => true,
-                'message' => Messages::LOGIN_SUCCESSFUL,
-                'token' => $result['token']
-            ]);
+            return ApiResponse::success(Messages::LOGIN_SUCCESSFUL, ['token' => $result['token']]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return ApiResponse::unauthorized(Messages::INVALID_LOGIN_CREDENTIALS);

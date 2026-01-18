@@ -21,7 +21,11 @@ class ApiResponse
         ];
 
         if ($data !== null) {
-            $response['data'] = $data;
+            if (is_array($data)) {
+                $response = array_merge($response, $data);
+            } else {
+                $response['data'] = $data;
+            }
         }
 
         return response()->json($response, $statusCode);
