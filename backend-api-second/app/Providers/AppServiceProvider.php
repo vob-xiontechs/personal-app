@@ -29,6 +29,17 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind('auth.facade', function ($app) {
             return $app->make('auth.service');
         });
+
+        // Register Custom JWT User Provider
+        $this->app->bind(\Illuminate\Contracts\Auth\UserProvider::class, function ($app) {
+            return new CustomJWTUserProvider($app->make(\App\Models\User::class));
+        });
+
+        // Register Custom JWT Auth Provider
+        $this->app->singleton('custom_jwt_auth', function ($app) {
+            $userProvider = $app->make(\Illuminate\Contracts\Auth\UserProvider::class);
+            return new CustomJWTAuthProvider($userProvider);
+        });
     }
 
     /**

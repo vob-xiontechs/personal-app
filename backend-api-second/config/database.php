@@ -116,16 +116,17 @@ return [
         'mongodb' => [
             'driver' => 'mongodb',
             'dsn' => env('DB_DSN'),
-            'host' => env('DB_HOST', 'dbAppSecond'),
+            'host' => env('DB_HOST', 'mongodb'),
             'port' => env('DB_PORT', 27017),
             'database' => env('DB_DATABASE', 'backend_db_second'),
-            'username' => null,
-            'password' => null,
+            'username' => env('DB_USERNAME', 'admin'),
+            'password' => env('DB_PASSWORD', 'mypassword123'),
             'options' => [
                 'database' => env('DB_DATABASE', 'backend_db_second'),
                 'connectTimeoutMS' => 30000,
                 'serverSelectionTimeoutMS' => 30000,
                 'socketTimeoutMS' => 30000,
+                'authSource' => 'admin',
             ],
             'driver_options' => [
                 'context' => stream_context_create([

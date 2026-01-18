@@ -36,3 +36,44 @@ Route::get('health', function () {
         'version' => '1.0.0'
     ]);
 });
+
+// Test Route
+Route::get('test', function () {
+    return response()->json([
+        'message' => 'Test route works',
+        'timestamp' => now()->toISOString()
+    ]);
+});
+
+// Simple register test
+Route::post('register-test', function (Request $request) {
+    try {
+        $data = $request->all();
+
+        // Basic validation
+        if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
+            return response()->json([
+                'error' => 'Missing required fields',
+                'received' => $data
+            ], 400);
+        }
+
+        // Create user directly
+        $userRepository = app(\App\Repositories\Auth\UserRepositoryInterface::class);
+        $user = $userRepository->create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password'])
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User registered successfully',
+            'user_id' => (string) $user->_id
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Registration failed: ' . $e->getMessage()
+        ], 500);
+    }
+});

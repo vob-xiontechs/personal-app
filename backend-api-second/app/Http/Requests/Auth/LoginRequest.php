@@ -22,10 +22,10 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email là bắt buộc.',
-            'email.email' => 'Email không đúng định dạng.',
-            'password.required' => 'Mật khẩu là bắt buộc.',
-            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Email format is invalid.',
+            'password.required' => 'Password is required.',
+            'password.min' => 'Password must be at least 8 characters.',
         ];
     }
 

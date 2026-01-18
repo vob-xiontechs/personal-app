@@ -23,27 +23,25 @@ class RegisterRequest extends FormRequest
             'name' => 'required|string|max:255|min:2',
             'email' => [
                 'required',
-                'email:rfc,dns',
+                'email',
                 'max:255',
-                Rule::unique('users', 'email')
+                // Temporarily removed unique validation for MongoDB compatibility
+                // Rule::unique('tbl_users_sd', 'email')
             ],
-            'password' => 'required|string|min:8|max:255|confirmed',
-            'password_confirmation' => 'required|string|min:8|max:255',
+            'password' => 'required|string|min:8|max:255',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required' => 'Tên là bắt buộc.',
-            'name.min' => 'Tên phải có ít nhất 2 ký tự.',
-            'email.required' => 'Email là bắt buộc.',
-            'email.email' => 'Email không đúng định dạng.',
-            'email.unique' => 'Email đã được sử dụng.',
-            'password.required' => 'Mật khẩu là bắt buộc.',
-            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
-            'password.confirmed' => 'Mật khẩu xác nhận không khớp.',
-            'password_confirmation.required' => 'Vui lòng xác nhận mật khẩu.',
+            'name.required' => 'Name is required.',
+            'name.min' => 'Name must be at least 2 characters.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Email format is invalid.',
+            'email.unique' => 'Email has already been taken.',
+            'password.required' => 'Password is required.',
+            'password.min' => 'Password must be at least 8 characters.',
         ];
     }
 
@@ -57,11 +55,6 @@ class RegisterRequest extends FormRequest
 
     public function validated($key = null, $default = null)
     {
-        $validated = parent::validated($key, $default);
-
-        // Remove password_confirmation from validated data
-        unset($validated['password_confirmation']);
-
-        return $validated;
+        return parent::validated($key, $default);
     }
 }

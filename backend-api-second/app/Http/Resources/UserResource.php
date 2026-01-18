@@ -2,10 +2,11 @@
 
 namespace App\Http\Resources;
 
+use App\Utils\MongoDateUtil;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class TblUserSdResource extends JsonResource
+class UserResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -13,12 +14,13 @@ class TblUserSdResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->_id,
+            'id' => $this->user_id ?? $this->_id, // Use user_id if available, fallback to _id
+            'user_id' => $this->user_id, // Include both for backward compatibility
             'name' => $this->name,
             'email' => $this->email,
             'email_verified_at' => $this->email_verified_at,
-            'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'created_at' => MongoDateUtil::formatUTCDateTime($this->created_at),
+            'updated_at' => MongoDateUtil::formatUTCDateTime($this->updated_at),
         ];
     }
 

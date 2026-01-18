@@ -5,9 +5,12 @@ namespace App\Services\Auth;
 use App\Models\User;
 use App\Repositories\Auth\UserRepositoryInterface;
 use App\Services\Auth\Jwt\JwtFacade;
+use App\Utils\IdGeneratorUtil;
+use App\Utils\JwtUtils;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthService
 {
@@ -28,23 +31,21 @@ class AuthService
                 ]);
             }
 
+            // Generate unique user_id using utility
+            $userId = IdGeneratorUtil::generateUserId();
+
             // Create user
             $user = $this->userRepository->create([
+                'user_id' => $userId,
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
             ]);
 
-            // Generate JWT token
-            $token = JwtFacade::generateToken($user);
-
             Log::info('User registered successfully', ['user_id' => $user->_id, 'email' => $user->email]);
 
             return [
-                'user' => $user,
-                'token' => $token,
-                'token_type' => 'bearer',
-                'expires_in' => config('jwt.ttl') * 60
+                'user' => $user
             ];
 
         } catch (\Exception $e) {
@@ -142,9 +143,55 @@ class AuthService
     public function getProfile(): User
     {
         try {
-            return JwtFacade::getAuthenticatedUser();
+            // Get the JWT auth instance (middleware has already set the token)
+            $jwtAuth = app('tymon.jwt.auth');
+
+            // Get the token string and use JwtUtils to process it
+            $token = $jwtAuth->getToken();
+            $payload = JwtUtils::decodePayload($token);
+
+            if (!$payload) {
+                throw ValidationException::withMessages([
+                    'user' => ['Invalid token: unable to decode payload.']
+                ]);
+            }
+
+            // Extract user_id from JWT payload using JwtUtils
+            $userId = JwtUtils::getSubject($payload);
+
+            if (!$userId) {
+                throw ValidationException::withMessages([
+                    'user' => ['Invalid token: missing user identifier.']
+                ]);
+            }
+
+            // Validate token expiration using JwtUtils
+            if (JwtUtils::isExpiringSoon($payload, 0)) {
+                Log::warning('Token has expired or is expiring soon', [
+                    'user_id' => $userId,
+                    'remaining_time' => JwtUtils::getRemainingTime($payload)
+                ]);
+                throw ValidationException::withMessages([
+                    'user' => ['Token has expired.']
+                ]);
+            }
+
+            // Find user by user_id (prioritized lookup)
+            $user = $this->userRepository->findById($userId);
+
+            if (!$user) {
+                throw ValidationException::withMessages([
+                    'user' => ['User not found.']
+                ]);
+            }
+
+            return $user;
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
-            Log::error('Get profile failed', ['error' => $e->getMessage()]);
+            Log::error('Get profile failed', [
+                'error' => $e->getMessage()
+            ]);
             throw ValidationException::withMessages([
                 'user' => ['Unable to retrieve user profile.']
             ]);

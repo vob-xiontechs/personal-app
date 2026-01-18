@@ -15,7 +15,7 @@ return [
 
     'defaults' => [
         'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        'passwords' => env('AUTH_PASSWORD_BROKER', 'tbl_users_sd'),
     ],
 
     /*
@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'api' => [
+            'driver' => 'jwt',
+            'provider' => 'jwt_users',
+        ],
     ],
 
     /*
@@ -61,8 +66,13 @@ return [
 
     'providers' => [
         'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+            'driver' => 'custom_jwt',
+            'model' => App\Models\User::class,
+        ],
+
+        'jwt_users' => [
+            'driver' => 'custom_jwt',
+            'model' => App\Models\User::class,
         ],
 
         // 'users' => [
@@ -91,8 +101,8 @@ return [
     */
 
     'passwords' => [
-        'users' => [
-            'provider' => 'users',
+        'tbl_users_sd' => [
+            'provider' => 'tbl_users_sd',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
             'expire' => 60,
             'throttle' => 60,

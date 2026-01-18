@@ -6,16 +6,63 @@ use App\Http\Controllers\Controller;
 use App\Services\Auth\AuthFacade as AuthService;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
-use App\Http\Resources\TblUserSdResource;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @OA\Tag(
+ *     name="Authentication",
+ *     description="API Endpoints for User Authentication"
+ * )
+ */
 class AuthController extends Controller
 {
     /**
      * Register a new user
+     *
+     * @OA\Post(
+     *     path="/api/auth/register",
+     *     summary="Register a new user",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name","email","password"},
+     *             @OA\Property(property="name", type="string", example="John Doe"),
+     *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
+     *             @OA\Property(property="password", type="string", minLength=8, example="password123")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="User registered successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="User registered successfully"),
+     *             @OA\Property(property="data", ref="#/components/schemas/User")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Validation failed"),
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=500,
+     *         description="Registration failed",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Registration failed. Please try again.")
+     *         )
+     *     )
+     * )
      */
     public function register(RegisterRequest $request): JsonResponse
     {
@@ -30,12 +77,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'User registered successfully',
-                'data' => [
-                    'user' => new UserSdResource($result['user']),
-                    'token' => $result['token'],
-                    'token_type' => $result['token_type'],
-                    'expires_in' => $result['expires_in']
-                ]
+                'data' => new UserResource($result['user'])
             ], Response::HTTP_CREATED);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -73,14 +115,8 @@ class AuthController extends Controller
             ]);
 
             return response()->json([
-                'success' => true,
                 'message' => 'Login successful',
-                'data' => [
-                    'user' => new UserSdResource($result['user']),
-                    'token' => $result['token'],
-                    'token_type' => $result['token_type'],
-                    'expires_in' => $result['expires_in']
-                ]
+                'token' => $result['token']
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -193,7 +229,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'User profile retrieved successfully',
-                'data' => new TblUserSdResource($user)
+                'data' => new UserResource($user)
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
