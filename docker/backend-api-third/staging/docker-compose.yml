@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  backend-api-third:
+    build:
+      context: ../../../backend-api-third
+      dockerfile: Dockerfile
+    container_name: backend-api-third-staging
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/backend_api_third_staging
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../../../backend-api-third:/app:cached
+    networks:
+      - backend-api-third-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  postgres:
+    image: postgres:15
+    container_name: postgres-staging
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: backend_api_third_staging
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data_staging:/var/lib/postgresql/data
+      - ./backup:/backup
+    networks:
+      - backend-api-third-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d backend_api_third_staging"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  postgres_data_staging:
+    driver: local
+
+networks:
+  backend-api-third-network:
+    driver: bridge
+    name: backend-api-third-staging
