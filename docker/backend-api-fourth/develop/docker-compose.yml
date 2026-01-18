@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  backend-api-fourth:
+    build:
+      context: ../../../backend-api-fourth
+      dockerfile: Dockerfile
+    container_name: backend-api-fourth-develop
+    restart: unless-stopped
+    ports:
+      - "9090:8080"
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=develop_db
+      - DB_USERNAME=develop_user
+      - DB_PASSWORD=develop_pass
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend-api-fourth-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: mysql:8.1
+    container_name: db-backend-api-fourth-develop
+    environment:
+      MYSQL_DATABASE: develop_db
+      MYSQL_USER: develop_user
+      MYSQL_PASSWORD: develop_pass
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "3310:3306"
+    volumes:
+      - db-backend-api-fourth-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "develop_user", "-pdevelop_pass"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 10s
+
+volumes:
+  db-backend-api-fourth-data:
+    driver: local
+
+networks:
+  backend-api-fourth-network:
+    driver: bridge
+    name: backend-api-fourth-develop
