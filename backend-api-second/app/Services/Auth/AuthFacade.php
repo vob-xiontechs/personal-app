@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Facade;
  * @method static array login(array $credentials)
  * @method static bool logout()
  * @method static array refresh()
- * @method static \App\Models\User getProfile()
  */
 class AuthFacade extends Facade
 {

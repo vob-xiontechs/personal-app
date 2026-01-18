@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\AuthController;
+use App\Http\Controllers\Api\User\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,7 +26,11 @@ Route::prefix('auth')->group(function () {
 Route::middleware('jwt.auth')->prefix('auth')->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', [AuthController::class, 'refresh']);
-    Route::get('profile', [AuthController::class, 'profile']);
+});
+
+// Protected User Routes (Auth Required)
+Route::middleware('jwt.auth')->prefix('user')->group(function () {
+    Route::get('profile', [UserController::class, 'profile']);
 });
 
 // Health Check Route
@@ -59,7 +64,7 @@ Route::post('register-test', function (Request $request) {
         }
 
         // Create user directly
-        $userRepository = app(\App\Repositories\Auth\UserRepositoryInterface::class);
+        $userRepository = app(\App\Repositories\User\UserRepositoryInterface::class);
         $user = $userRepository->create([
             'name' => $data['name'],
             'email' => $data['email'],

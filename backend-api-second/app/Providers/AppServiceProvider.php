@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
-use App\Repositories\Auth\UserRepository;
-use App\Repositories\Auth\UserRepositoryInterface;
+use App\Repositories\User\UserRepository;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Services\Auth\AuthService;
 use App\Services\Auth\AuthFacade;
+use App\Services\User\UserService;
+use App\Services\User\UserFacade;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,9 +27,19 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->singleton('user.service', function ($app) {
+            return new UserService(
+                $app->make(UserRepositoryInterface::class)
+            );
+        });
+
         // Register Facades
         $this->app->bind('auth.facade', function ($app) {
             return $app->make('auth.service');
+        });
+
+        $this->app->bind('user.facade', function ($app) {
+            return $app->make('user.service');
         });
 
         // Register Custom JWT User Provider

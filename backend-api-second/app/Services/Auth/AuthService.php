@@ -3,10 +3,11 @@
 namespace App\Services\Auth;
 
 use App\Models\User;
-use App\Repositories\Auth\UserRepositoryInterface;
+use App\Repositories\User\UserRepositoryInterface;
 use App\Services\Auth\Jwt\JwtFacade;
 use App\Utils\IdGeneratorUtil;
 use App\Utils\JwtUtils;
+use App\Constants\Auth\Messages;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Log;
@@ -27,7 +28,7 @@ class AuthService
             // Check if user already exists
             if ($this->userRepository->findByEmail($data['email'])) {
                 throw ValidationException::withMessages([
-                    'email' => ['Email already exists.']
+                    'email' => [Messages::EMAIL_ALREADY_EXISTS]
                 ]);
             }
 
@@ -69,7 +70,7 @@ class AuthService
             // Verify user exists and password is correct
             if (!$user || !Hash::check($credentials['password'], $user->password)) {
                 throw ValidationException::withMessages([
-                    'email' => ['Invalid email or password.']
+                    'email' => [Messages::INVALID_LOGIN_CREDENTIALS]
                 ]);
             }
 
@@ -133,67 +134,6 @@ class AuthService
             Log::error('Token refresh failed', ['error' => $e->getMessage()]);
             throw ValidationException::withMessages([
                 'token' => ['Token refresh failed.']
-            ]);
-        }
-    }
-
-    /**
-     * Get authenticated user profile
-     */
-    public function getProfile(): User
-    {
-        try {
-            // Get the JWT auth instance (middleware has already set the token)
-            $jwtAuth = app('tymon.jwt.auth');
-
-            // Get the token string and use JwtUtils to process it
-            $token = $jwtAuth->getToken();
-            $payload = JwtUtils::decodePayload($token);
-
-            if (!$payload) {
-                throw ValidationException::withMessages([
-                    'user' => ['Invalid token: unable to decode payload.']
-                ]);
-            }
-
-            // Extract user_id from JWT payload using JwtUtils
-            $userId = JwtUtils::getSubject($payload);
-
-            if (!$userId) {
-                throw ValidationException::withMessages([
-                    'user' => ['Invalid token: missing user identifier.']
-                ]);
-            }
-
-            // Validate token expiration using JwtUtils
-            if (JwtUtils::isExpiringSoon($payload, 0)) {
-                Log::warning('Token has expired or is expiring soon', [
-                    'user_id' => $userId,
-                    'remaining_time' => JwtUtils::getRemainingTime($payload)
-                ]);
-                throw ValidationException::withMessages([
-                    'user' => ['Token has expired.']
-                ]);
-            }
-
-            // Find user by user_id (prioritized lookup)
-            $user = $this->userRepository->findById($userId);
-
-            if (!$user) {
-                throw ValidationException::withMessages([
-                    'user' => ['User not found.']
-                ]);
-            }
-
-            return $user;
-        } catch (ValidationException $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            Log::error('Get profile failed', [
-                'error' => $e->getMessage()
-            ]);
-            throw ValidationException::withMessages([
-                'user' => ['Unable to retrieve user profile.']
             ]);
         }
     }

@@ -7,9 +7,10 @@ use App\Services\Auth\AuthFacade as AuthService;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\UserResource;
+use App\Constants\Auth\Messages;
+use App\Utils\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -69,35 +70,13 @@ class AuthController extends Controller
         try {
             $result = AuthService::register($request->validated());
 
-            Log::info('User registration API called successfully', [
-                'email' => $request->email,
-                'ip' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'User registered successfully',
-                'data' => new UserResource($result['user'])
-            ], Response::HTTP_CREATED);
+            return ApiResponse::success(Messages::USER_REGISTERED_SUCCESSFULLY, new UserResource($result['user']), Response::HTTP_CREATED);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation failed',
-                'errors' => $e->errors()
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return ApiResponse::validationError(Messages::VALIDATION_FAILED, $e->errors());
 
         } catch (\Exception $e) {
-            Log::error('User registration API failed', [
-                'email' => $request->email,
-                'error' => $e->getMessage(),
-                'ip' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Registration failed. Please try again.'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResponse::internalServerError(Messages::REGISTRATION_FAILED);
         }
     }
 
@@ -109,34 +88,17 @@ class AuthController extends Controller
         try {
             $result = AuthService::login($request->only(['email', 'password']));
 
-            Log::info('User login API called successfully', [
-                'email' => $request->email,
-                'ip' => $request->ip()
-            ]);
-
             return response()->json([
-                'message' => 'Login successful',
+                'success' => true,
+                'message' => Messages::LOGIN_SUCCESSFUL,
                 'token' => $result['token']
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid login credentials',
-                'errors' => $e->errors()
-            ], Response::HTTP_UNAUTHORIZED);
+            return ApiResponse::unauthorized(Messages::INVALID_LOGIN_CREDENTIALS);
 
         } catch (\Exception $e) {
-            Log::error('User login API failed', [
-                'email' => $request->email,
-                'error' => $e->getMessage(),
-                'ip' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Login failed. Please try again.'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResponse::internalServerError(Messages::LOGIN_FAILED);
         }
     }
 
@@ -146,31 +108,12 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         try {
-            $user = auth()->user();
-            $logout = AuthService::logout();
+            AuthService::logout();
 
-            Log::info('User logout API called', [
-                'user_id' => $user?->_id,
-                'email' => $user?->email,
-                'ip' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Logout successful'
-            ]);
+            return ApiResponse::success(Messages::LOGOUT_SUCCESSFUL);
 
         } catch (\Exception $e) {
-            Log::error('User logout API failed', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-                'ip' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Logout failed'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResponse::internalServerError(Messages::LOGOUT_FAILED);
         }
     }
 
@@ -182,74 +125,17 @@ class AuthController extends Controller
         try {
             $result = AuthService::refresh();
 
-            Log::info('Token refresh API called successfully', [
-                'user_id' => auth()->id(),
-                'ip' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Token refreshed successfully',
-                'data' => [
-                    'token' => $result['token'],
-                    'token_type' => $result['token_type'],
-                    'expires_in' => $result['expires_in']
-                ]
+            return ApiResponse::success(Messages::TOKEN_REFRESHED_SUCCESSFULLY, [
+                'token' => $result['token'],
+                'token_type' => $result['token_type'],
+                'expires_in' => $result['expires_in']
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Token refresh failed',
-                'errors' => $e->errors()
-            ], Response::HTTP_UNAUTHORIZED);
+            return ApiResponse::unauthorized(Messages::TOKEN_REFRESH_FAILED);
 
         } catch (\Exception $e) {
-            Log::error('Token refresh API failed', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-                'ip' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Token refresh failed'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
-     * Get authenticated user profile
-     */
-    public function profile(Request $request): JsonResponse
-    {
-        try {
-            $user = AuthService::getProfile();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'User profile retrieved successfully',
-                'data' => new UserResource($user)
-            ]);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unable to retrieve user profile',
-                'errors' => $e->errors()
-            ], Response::HTTP_UNAUTHORIZED);
-
-        } catch (\Exception $e) {
-            Log::error('Get profile API failed', [
-                'user_id' => auth()->id(),
-                'error' => $e->getMessage(),
-                'ip' => $request->ip()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Unable to retrieve user profile'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResponse::internalServerError(Messages::TOKEN_REFRESH_FAILED);
         }
     }
 }
